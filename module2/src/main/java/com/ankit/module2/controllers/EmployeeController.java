@@ -4,46 +4,10 @@ import com.ankit.module2.dto.EmployeDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 /*
- * @RequestMapping is a class-level or method-level annotation
- * used to define a base URL for handling HTTP requests.
- *
- * When applied at the class level, @RequestMapping acts as a
- * common or parent URL for all request mappings inside the controller.
- *
- * In this code:
- * @RequestMapping("/employees")
- *
- * means that every endpoint defined inside this controller
- * will start with "/employees".
- *
- * This helps in:
- * 1. Grouping related APIs
- * 2. Avoiding repetition of the same URL prefix
- * 3. Improving code readability and maintainability
- *
- * Example resolution in this controller:
- *
- * Class-level mapping:
- * /employees
- *
- * Method-level mappings:
- * 1. @GetMapping("/{empId}")
- *    Final URL → /employees/{empId}
- *
- * 2. @GetMapping
- *    Final URL → /employees
- *
- * @RequestMapping does NOT handle requests by itself;
- * it only defines a mapping path.
- * The actual HTTP method handling is done by
- * @GetMapping, @PostMapping, @PutMapping, etc.
- *
- * @RequestMapping can also be used at the method level,
- * but in modern Spring Boot applications,
- * it is mainly used at the class level as a base path.
- *
- * Using @RequestMapping at the class level follows
- * REST API design best practices.
+    methods allEmpList() and createNewEmp() are come under the parent url (/employees)
+    By Default browser send the get request so allEmpList execute
+    We can send Post request from the front-end or using Postman
+
  */
 
 @RestController
@@ -64,4 +28,13 @@ public class EmployeeController {
     return "Hello " + id + " " + "My age is "+ age;
     }
 
+    @PostMapping
+    public String createNewEmp(){
+        return "I am new Employee";
+    }
+
+    @PutMapping
+    public String updateEmpById(){
+        return "Hello from the put ";
+    }
 }
