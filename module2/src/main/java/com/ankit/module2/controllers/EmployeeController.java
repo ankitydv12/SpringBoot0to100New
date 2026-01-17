@@ -3,13 +3,19 @@ package com.ankit.module2.controllers;
 import com.ankit.module2.dto.EmployeeDTO;
 import com.ankit.module2.entities.EmployeeEntity;
 import com.ankit.module2.repositories.EmployeeRepository;
+import com.ankit.module2.service.EmployeeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 /*
-    This Code Show to HTTP request that connect to a database . here dummy data is used just to show
-    In this i am not using lambook for EmployeeEntity Management
+    Service layer is implemented and now it handle all the bussiness logic
+    Controller have the bean of the Service layer which call the function of the EmployeeService
+    The Service Layer or EmployeeService have the Repositotry layer which handle db  query and connect to database
+    The Problem in this code:
+        We have to return EmployeeDTO from service layer but we are returing Employee Entity .
+        We need to convert into the EmployeeDTO with help of library called modelmapper. In next commit
+
  */
 
 @RestController
@@ -17,55 +23,31 @@ import java.util.List;
 public class EmployeeController {
 
     /*
-        *Injecting the bean of EmployeeRepository through Constructor .
+
     */
-    private final EmployeeRepository employeeRepositoryObj;
-    public EmployeeController(EmployeeRepository employeeRepositoryObj) {
-        this.employeeRepositoryObj = employeeRepositoryObj;
+    private final EmployeeService employeeServiceObj;
+
+    //constructor --> injecting point
+    public EmployeeController(EmployeeService employeeServiceObj) {
+        this.employeeServiceObj = employeeServiceObj;
     }
 
     @GetMapping(path="/{empId}")
     public EmployeeEntity sendDTO(@PathVariable(name = "empId") Long empID)
     {
-        /*
-         * findById() returns Optional<EmployeeEntity>
-         *
-         * Optional is used to avoid NullPointerException.
-         *
-         * orElse(null) means:
-         * - If record exists → return entity
-         * - If not → return null
-         *
-         * INTERVIEW POINT:
-         * Returning null is NOT recommended in production.
-         * Proper approach: throw custom exception (EmployeeNotFoundException).
-         */
-       return employeeRepositoryObj.findById(empID).orElse(null); // this return an optional
+       return employeeServiceObj.getEmployeeById(empID);
     }
 
-    //http://localhost:8080/employees?inputid=7&age=21
     @GetMapping
     public List<EmployeeEntity> allEmpList(@RequestParam(required = false,name = "inputid" , defaultValue = "123") Integer id , Integer age )
     {
-        /*
-         * findAll() fetches all records from DB.
-         *
-         * IMPORTANT:
-         * In real projects, pagination MUST be used.
-         */
-        return employeeRepositoryObj.findAll();
+        return employeeServiceObj.getAllEmployee();
     }
 
     @PostMapping
     public EmployeeEntity createNewEmp(@RequestBody EmployeeEntity inputemp){
-        /*
-         * save() performs INSERT if ID is null
-         * save() performs UPDATE if ID exists
-         *
-         * INTERVIEW POINT:
-         * save() is not purely INSERT.
-         */
-        return employeeRepositoryObj.save(inputemp);
+
+        return employeeServiceObj.addEmployee(inputemp);
     }
 
     @PutMapping

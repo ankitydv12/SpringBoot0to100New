@@ -1,18 +1,20 @@
-Commit ---> Module2.3.2 -> Lambok | h2
+Commit ---> Module2.3.3 -> Service Layer
 
-In this commit the lombok and h2(In memory database) are added and now the data will save in the h2 database .
-The configuration are handle by lombok
-From the POSTMAN we can store data to database and also fetch it from
+    Service layer is implemented and now it handle all the bussiness logic
+    Controller have the bean of the Service layer which call the function of the EmployeeService
+    The Service Layer or EmployeeService have the Repositotry layer which handle db  query and connect to database
+    The Problem in this code:
+        We have to return EmployeeDTO from service layer but we are returing Employee Entity .
+        We need to convert into the EmployeeDTO with help of library called modelmapper. In next commit
 
-The H2 database uses inmemory database and the url is --> Database JDBC URL [jdbc:h2:mem:22ea8ff6-8f7b-4f37-a07a-cdafee3d8115]
 
-We can store the data to file also by add some properties in application.properties:
-    spring.datasource.url=jdbc:h2:file:/media/ankit/Learning/SpringBoot0to100NewLocal/module2/src/main/java/com/ankit/module2/db
-    spring.datasource.username=ankitydv12
-    spring.datasource.password=Ankit@123
-
-Configuration of some properties in application.properties:
-    spring.h2.console.enabled=true --> enable the h2 console at url
-    spring.jpa.hibernate.ddl-auto=create -->  Drops existing tables and CREATES fresh tables every time the application starts.
-    spring.jpa.hibernate.ddl-auto=none --> Hibernate does NOT perform any schema operation. # Database schema must already exist.
-    spring.jpa.hibernate.ddl-auto=update --> Updates the existing schema based on Entity changes. # Preserves existing data.
+Service Layer:
+    •The service layer acts as a bridge between the persistence layer
+    (responsible for data access) and the presentation layer (handling
+    user interaction)
+    • It encapsulates the business logic of the application, orchestrates
+    interactions between different components, and provides a clean
+    interface for external clients to interact with the system.
+    • By abstracting away the complexities of data access and business
+    operations, the service layer promotes modularity, maintainability,
+    and scalability.
