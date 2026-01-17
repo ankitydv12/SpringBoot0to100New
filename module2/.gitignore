@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# H2 database
+*.mv.db
+*.trace.db
+
+# Personal notes
+ErrorAndSoln.txt
