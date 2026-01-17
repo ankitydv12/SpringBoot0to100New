@@ -1,51 +1,18 @@
-Commit ---> Module2.3.1 -> Enitity | Repository
+Commit ---> Module2.3.2 -> Lambok | h2
 
-📌 Concept of Repository Layer in Spring Boot
+In this commit the lombok and h2(In memory database) are added and now the data will save in the h2 database .
+The configuration are handle by lombok
+From the POSTMAN we can store data to database and also fetch it from
 
-In Spring Boot, the Repository layer acts as the direct communication bridge between the application and the database.
-The controller does not talk to the database directly; instead, it delegates all persistence-related operations to the repository. By extending JpaRepository,
-the repository automatically gets ready-made CRUD operations such as save(), findById(), and findAll() without writing any SQL. Spring Data JPA generates the actual implementation at runtime using Hibernate,
-which means the developer only defines what data is needed, not how it is fetched. This abstraction keeps the code clean, maintainable, and aligned with industry standards.
+The H2 database uses inmemory database and the url is --> Database JDBC URL [jdbc:h2:mem:22ea8ff6-8f7b-4f37-a07a-cdafee3d8115]
 
-📌 How Database Working Happens Behind the Scenes
+We can store the data to file also by add some properties in application.properties:
+    spring.datasource.url=jdbc:h2:file:/media/ankit/Learning/SpringBoot0to100NewLocal/module2/src/main/java/com/ankit/module2/db
+    spring.datasource.username=ankitydv12
+    spring.datasource.password=Ankit@123
 
-When a controller method calls a repository method like findById() or save(), Spring Boot forwards the request to Hibernate (the JPA implementation).
-Hibernate translates the Java entity (EmployeeEntity) into SQL queries based on the entity annotations such as @Entity, @Table, and @Id. These SQL queries are then executed against the configured database using the DataSource. The database returns the result,
- which Hibernate converts back into Java objects and returns to the repository, which finally sends the data to the controller. Throughout this process, the developer never writes SQL explicitly, yet full database interaction happens efficiently and safely.
-
-/*
- * IMPORTANT ENTITY POINTS (INTERVIEW GOLD):
- *
- * 1. Entity must have:
- *    - @Entity
- *    - @Id
- *    - Default constructor
- *
- * 2. Entity objects are MANAGED by Hibernate.
- *
- * 3. Entity should NOT contain business logic.
- *
- * 4. Entity is NOT DTO.
- *    - Entity → DB mapping
- *    - DTO → API response mapping
- */
-
-
-/*
- * JpaRepository<T, ID>
- *
- * T  → Entity class
- * ID → Primary key type
- *
- * INTERVIEW POINTS:
- *
- * 1. JpaRepository extends:
- *    - PagingAndSortingRepository
- *    - CrudRepository
- *
- * 2. Provides pagination & sorting support.
- *
- * 3. Uses Hibernate internally.
- *
- * 4. Repository layer SHOULD NOT contain business logic.
- */
+Configuration of some properties in application.properties:
+    spring.h2.console.enabled=true --> enable the h2 console at url
+    spring.jpa.hibernate.ddl-auto=create -->  Drops existing tables and CREATES fresh tables every time the application starts.
+    spring.jpa.hibernate.ddl-auto=none --> Hibernate does NOT perform any schema operation. # Database schema must already exist.
+    spring.jpa.hibernate.ddl-auto=update --> Updates the existing schema based on Entity changes. # Preserves existing data.
