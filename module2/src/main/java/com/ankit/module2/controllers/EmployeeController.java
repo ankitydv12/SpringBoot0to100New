@@ -2,19 +2,12 @@ package com.ankit.module2.controllers;
 
 import com.ankit.module2.dto.EmployeeDTO;
 import com.ankit.module2.entities.EmployeeEntity;
-import com.ankit.module2.repositories.EmployeeRepository;
 import com.ankit.module2.service.EmployeeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 /*
-    Service layer is implemented and now it handle all the bussiness logic
-    Controller have the bean of the Service layer which call the function of the EmployeeService
-    The Service Layer or EmployeeService have the Repositotry layer which handle db  query and connect to database
-    The Problem in this code:
-        We have to return EmployeeDTO from service layer but we are returing Employee Entity .
-        We need to convert into the EmployeeDTO with help of library called modelmapper. In next commit
 
  */
 
@@ -33,19 +26,20 @@ public class EmployeeController {
     }
 
     @GetMapping(path="/{empId}")
-    public EmployeeEntity sendDTO(@PathVariable(name = "empId") Long empID)
+    public EmployeeDTO sendDTO(@PathVariable(name = "empId") Long empID)
     {
        return employeeServiceObj.getEmployeeById(empID);
     }
 
     @GetMapping
-    public List<EmployeeEntity> allEmpList(@RequestParam(required = false,name = "inputid" , defaultValue = "123") Integer id , Integer age )
+    public List<EmployeeDTO> allEmpList(@RequestParam(required = false,name = "inputid" , defaultValue = "123") Integer id , Integer age )
     {
+        System.out.println(employeeServiceObj.getAllEmployee());
         return employeeServiceObj.getAllEmployee();
     }
 
     @PostMapping
-    public EmployeeEntity createNewEmp(@RequestBody EmployeeEntity inputemp){
+    public EmployeeDTO createNewEmp(@RequestBody EmployeeDTO inputemp){
 
         return employeeServiceObj.addEmployee(inputemp);
     }

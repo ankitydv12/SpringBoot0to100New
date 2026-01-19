@@ -1,20 +1,60 @@
 Commit ---> Module2.3.3 -> Service Layer
 
-    Service layer is implemented and now it handle all the bussiness logic
-    Controller have the bean of the Service layer which call the function of the EmployeeService
-    The Service Layer or EmployeeService have the Repositotry layer which handle db  query and connect to database
-    The Problem in this code:
-        We have to return EmployeeDTO from service layer but we are returing Employee Entity .
-        We need to convert into the EmployeeDTO with help of library called modelmapper. In next commit
-
-
-Service Layer:
-    •The service layer acts as a bridge between the persistence layer
-    (responsible for data access) and the presentation layer (handling
-    user interaction)
-    • It encapsulates the business logic of the application, orchestrates
-    interactions between different components, and provides a clean
-    interface for external clients to interact with the system.
-    • By abstracting away the complexities of data access and business
-    operations, the service layer promotes modularity, maintainability,
-    and scalability.
+/*
+ * CONCEPT: Controller–DTO–Entity separation (Industry Standard)
+ *
+ * 1️⃣ Controller SHOULD deal only with DTOs, NOT Entities.
+ *    - Controller is part of API layer.
+ *    - Exposing Entity directly can leak database structure.
+ *    - DTO controls what data goes in API request/response.
+ *
+ * 2️⃣ Repository layer SHOULD deal only with Entities.
+ *    - Repository talks directly to the database.
+ *    - JPA works only with Entity classes.
+ *
+ * 3️⃣ Service layer acts as a CONVERSION & BUSINESS layer.
+ *    - Fetches Entity from Repository.
+ *    - Converts Entity → DTO before sending to Controller.
+ *    - Applies business logic if required.
+ *
+ * 4️⃣ Entity ↔ DTO conversion is done using ModelMapper.
+ *    - ModelMapper is a third-party library.
+ *    - It automatically maps fields with same names and types.
+ *
+ *
+ * -------------------------
+ * STEPS TO USE ModelMapper
+ * -------------------------
+ *
+ * Step 1️⃣: Add ModelMapper dependency in pom.xml.
+ *
+ * Step 2️⃣: Create a config package.
+ *         - Define a @Configuration class.
+ *         - Create a @Bean of ModelMapper.
+ *
+ * Step 3️⃣: Inject ModelMapper into Service layer
+ *         - Use constructor injection (BEST PRACTICE).
+ *
+ *
+ * -------------------------
+ * WORKING (CORE LOGIC)
+ * -------------------------
+ *
+ * modelMapper.map(Entity_Object, DTO_Class.class)
+ *
+ * Meaning:
+ * - Takes Entity object as input.
+ * - Converts it into DTO object.
+ * - Matches fields by name and type.
+ *
+ *
+ * -------------------------
+ * IMPORTANT INTERVIEW POINTS
+ * -------------------------
+ *
+ * ✔ Never return Entity directly from Controller in real projects.
+ * ✔ DTO improves security and API stability.
+ * ✔ Service layer is the right place for mapping logic.
+ * ✔ ModelMapper reduces boilerplate code (getters/setters).
+ *
+ */

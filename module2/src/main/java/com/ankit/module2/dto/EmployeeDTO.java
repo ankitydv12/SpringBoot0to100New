@@ -1,12 +1,16 @@
 package com.ankit.module2.dto;
 
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 
 /*
     *DTO stand for Data Transfer Object
     * This is POJO class
 */
+@Component
 public class EmployeeDTO {
 
     private Long id;
