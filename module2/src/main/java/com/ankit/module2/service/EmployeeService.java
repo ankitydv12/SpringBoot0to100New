@@ -45,4 +45,22 @@ public class EmployeeService {
         employeeRepository.save(inputempEntity);
         return modelMapperObj.map(inputempEntity, EmployeeDTO.class);
     }
+
+    public EmployeeDTO updateEmpById(EmployeeDTO empDTO, Long id) {
+        EmployeeEntity emp = modelMapperObj.map(empDTO,EmployeeEntity.class);
+        emp.setId(id);
+        return  modelMapperObj.map(employeeRepository.save(emp),EmployeeDTO.class);
+    }
+
+    public boolean deleteEmployeeById(Long id)
+    {
+        try {
+            boolean exits = employeeRepository.existsById(id);
+            if(!exits) return false;
+            employeeRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
