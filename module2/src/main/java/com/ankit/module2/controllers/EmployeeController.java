@@ -4,9 +4,11 @@ import com.ankit.module2.dto.EmployeeDTO;
 
 import com.ankit.module2.service.EmployeeService;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 /*
 
  */
@@ -54,5 +56,12 @@ public class EmployeeController {
     public boolean deleteEmployeeById(@PathVariable(name = "employeeId") Long id)
     {
         return employeeServiceObj.deleteEmployeeById(id);
+    }
+    @PatchMapping(path = "/{employeeId}")
+    public ResponseEntity<EmployeeDTO> updatePartialEmployeeById(@RequestBody Map<String, Object> updates,
+                                                                 @PathVariable Long employeeId) {
+        EmployeeDTO employeeDTO = employeeServiceObj.updatePartialEmployeeById(employeeId, updates);
+        if (employeeDTO == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(employeeDTO);
     }
 }
