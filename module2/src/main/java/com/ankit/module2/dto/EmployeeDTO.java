@@ -2,6 +2,7 @@ package com.ankit.module2.dto;
 
 
 import com.ankit.module2.annotation.EmployeeRoleValidation;
+import com.ankit.module2.annotation.PrimeNumbervalidation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -48,5 +49,8 @@ public class EmployeeDTO {
     @AssertTrue(message = "This should be always active")
     @JsonProperty("isActive")
     private Boolean isActive;
+
+    @PrimeNumbervalidation
+    private Integer prime;
 
 }

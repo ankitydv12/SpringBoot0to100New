@@ -32,4 +32,5 @@ public class EmployeeEntity {
     @JsonProperty("isActive")
     private Boolean isActive;
     private Double salary;
+    private Integer prime;
 }
