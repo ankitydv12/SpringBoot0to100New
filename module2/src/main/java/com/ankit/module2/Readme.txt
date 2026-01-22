@@ -1,14 +1,7 @@
-Commit --->  PrimeNumberValidation
+Commit --->2.7.1 --> ControllerLevelExceptionHanding
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD,ElementType.PARAMETER})
-@Constraint(validatedBy = {PrimeValidiator.class} )
-public @interface PrimeNumbervalidation {
-    String message() default "{Role of Employee is ADMIN or USER}";
 
-    Class<?>[] groups() default {};
-
-    Class<? extends Payload>[] payload() default {};
-}
-
+Exception can be handel by 2 types
+    Controller Level handling
+    Global Level Handing
 
