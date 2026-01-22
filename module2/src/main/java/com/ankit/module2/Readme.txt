@@ -1,132 +1,153 @@
-Commit --->2.4.5 -> Validation Annotation
-/*
- * ================================
- * CONCEPT: Validation In SpringBoot
- * ================================
-
-*Add dependencies to pom.xml
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
-/*
- * ================================
- * WHAT IS VALIDATION IN SPRING BOOT
- * ================================
- *
- * Validation means:
- * Ensuring that incoming data from the client is
- * CORRECT, SAFE, and MEETS BUSINESS RULES
- * BEFORE it reaches the database or business logic.
- *
- * Example:
- * - name should not be null
- * - email should be valid
- * - age should be within a range
- *
- * Validation protects your application from:
- * ✔ Bad input
- * ✔ Invalid state
- * ✔ Database corruption
- */
+Commit --->2.4.6 -> Custom Validation
 
 /*
- * ================================
- * WHY VALIDATION IS REQUIRED
- * ================================
+ * =========================================
+ * PART 1: STEPS TO CREATE A CUSTOM VALIDATION
+ * =========================================
  *
- * Client input CANNOT be trusted.
+ * Step 1️⃣: Create a custom annotation interface
+ * - Use @interface
+ * - Annotate it with @Constraint
+ * - Define message, groups, payload
  *
- * Even if:
- * - Frontend validates
- * - UI has restrictions
+ * Step 2️⃣: Create a Validator class
+ * - Implement ConstraintValidator<A, T>
+ * - A → Custom Annotation
+ * - T → Data type to validate (String, Integer, etc.)
  *
- * Backend MUST validate again because:
- * - APIs can be called directly (Postman, curl)
- * - Frontend can be bypassed
+ * Step 3️⃣: Write validation logic in isValid()
  *
- * INTERVIEW LINE:
- * "Backend validation is mandatory even if frontend validates."
+ * Step 4️⃣: Use the custom annotation on DTO fields
+ *
+ * Step 5️⃣: Trigger validation using @Valid in Controller
  */
 
 /*
  * =========================================
- * WHICH LIBRARY DOES VALIDATION IN SPRING
+ * PART 2: EXPLANATION OF YOUR CUSTOM ANNOTATION
  * =========================================
  *
- * Spring Boot uses:
- * ✔ Jakarta Bean Validation (JSR-380)
+ * FILE: EmployeeRoleValidation
+ */
+ /*
+  * @Retention(RetentionPolicy.RUNTIME)
+  *
+  * Means:
+  * - This annotation is available at RUNTIME.
+  *
+  * WHY REQUIRED:
+  * - Validation happens at runtime.
+  * - Hibernate Validator reads annotations using reflection.
+  *
+  * INTERVIEW POINT:
+  * If retention is not RUNTIME, validation will NOT work.
+  */
+
+/*
+ * @Target({ElementType.FIELD, ElementType.PARAMETER})
  *
- * Implementation provider:
- * ✔ Hibernate Validator
+ * Means:
+ * - Annotation can be applied on:
+ *   ✔ Class fields
+ *   ✔ Method parameters
  *
- * IMPORTANT:
- * - Spring Boot does NOT implement validation itself
- * - It integrates Hibernate Validator automatically
+ * Example usage:
+ * - DTO field
+ * - Controller method parameter
+ *
+ * Without this:
+ * - Annotation could be used at wrong places.
  */
 
 /*
- * =========================================
- * HOW VALIDATION WORKS INTERNALLY
- * =========================================
+ * @Constraint(validatedBy = {EmployeeRoleValidator.class})
  *
- * 1️⃣ Client sends JSON request
+ * MOST IMPORTANT PART
  *
- * 2️⃣ Spring converts JSON → DTO using Jackson
+ * Meaning:
+ * - This annotation is a validation constraint.
+ * - EmployeeRoleValidator contains the actual logic.
  *
- * 3️⃣ Validation annotations on DTO are checked
- *
- * 4️⃣ If validation FAILS:
- *    → Spring throws MethodArgumentNotValidException
- *
- * 5️⃣ If validation PASSES:
- *    → Request reaches Controller / Service
- *
- * Validation happens BEFORE method execution.
+ * Spring / Hibernate automatically links:
+ * EmployeeRoleValidation → EmployeeRoleValidator
  */
 
 /*
- * =========================================
- * HOW VALIDATION IS TRIGGERED
- * =========================================
+ * public @interface EmployeeRoleValidation
  *
- * Validation is triggered by:
+ * This defines a CUSTOM annotation.
  *
- * @Valid  (or @Validated)
- *
- * Example (conceptually):
- * public ResponseEntity<?> addEmployee(@Valid @RequestBody EmployeeDTO dto)
- *
- * @Valid tells Spring:
- * "Validate this object before method execution"
+ * Naming convention:
+ * - Annotation name usually ends with Validation or Constraint.
  */
 
 /*
- * =========================================
- * WHERE VALIDATION IS APPLIED
- * =========================================
+ * String message() default "{Role of Employee is ADMIN or USER}";
  *
- * ✔ DTO layer (BEST PRACTICE)
- * ❌ Entity layer (NOT recommended)
+ * This is the DEFAULT error message.
  *
- * WHY DTO?
- * - API-specific rules
- * - Different validations for different APIs
- * - Entity should remain persistence-focused
+ * Used when validation fails.
+ *
+ * NOTE:
+ * - Can be overridden at usage time.
+ * - Supports i18n (message bundles).
  */
-
+/*
+ * Class<?>[] groups() default {};
+ *
+ * Used for GROUP-BASED validation.
+ *
+ * Advanced use case:
+ * - Different validations for different scenarios
+ *
+ * INTERVIEW NOTE:
+ * Rarely used by freshers but REQUIRED by Bean Validation spec.
+ */
+/*
+ * Class<? extends Payload>[] payload() default {};
+ *
+ * Used to attach METADATA to validation errors.
+ *
+ * Mostly used by:
+ * - Frameworks
+ * - Logging / severity levels
+ *
+ * INTERVIEW TRUTH:
+ * Usually left empty in real projects.
+ */
 /*
  * =========================================
- * COMMON VALIDATION ANNOTATIONS (AWARENESS)
+ * VALIDATOR CLASS EXPLANATION
  * =========================================
  *
- * @NotNull      → must not be null
- * @NotBlank    → not null + not empty + not whitespace
- * @Email       → valid email format
- * @Size        → length constraints
- * @Min / @Max  → numeric limits
- *
- * These come from:
- * jakarta.validation.constraints
+ * FILE: EmployeeRoleValidator
  */
+/*
+ * implements ConstraintValidator<EmployeeRoleValidation, String>
+ *
+ * Meaning:
+ * - EmployeeRoleValidation → Annotation type
+ * - String → Field type being validated
+ *
+ * If field type mismatches → validation error at runtime.
+ */
+/*
+ * return inputString.equals("ADMIN") || inputString.equals("USER");
+ *
+ * Logic:
+ * - Only allow ADMIN or USER roles.
+ *
+ * If returns:
+ * ✔ true  → validation passes
+ * ❌ false → validation fails
+ */
+/*
+ * Alternative logic (commented):
+ *
+ * List<String> roles = List.of("USER","ADMIN");
+ * return roles.contains(inputString);
+ *
+ * This is MORE SCALABLE and readable.
+ */
+
 
