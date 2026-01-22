@@ -2,6 +2,7 @@ package com.ankit.module2.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,9 @@ public class EmployeeEntity {
     private String name;
     private String email;
     private Integer age;
+    private String role;
     private LocalDate dateOfJoining;
     @JsonProperty("isActive")
     private Boolean isActive;
+    private Double salary;
 }
