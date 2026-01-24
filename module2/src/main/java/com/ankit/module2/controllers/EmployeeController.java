@@ -29,11 +29,7 @@ public class EmployeeController {
                .orElseThrow(()->new NoSuchElementException());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<String> handleResourceNotFound(NoSuchElementException exception)
-    {
-        return new ResponseEntity<>("No Resouce found",HttpStatus.NOT_FOUND);
-    }
+
 
     @GetMapping
     public ResponseEntity<List<EmployeeDTO>> allEmpList(@RequestParam(required = false,name = "inputid" , defaultValue = "123") Integer id , Integer age )
