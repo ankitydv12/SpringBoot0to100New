@@ -1,4 +1,5 @@
 package com.ankit.module2.controllers;
+import com.ankit.module2.Exceptions.ResourceNotFoundExcp;
 import com.ankit.module2.dto.EmployeeDTO;
 import com.ankit.module2.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -26,7 +27,7 @@ public class EmployeeController {
        Optional<EmployeeDTO> employeeDTO =  employeeServiceObj.getEmployeeById(empID);
        return employeeDTO
                .map(employeeDTO1 -> ResponseEntity.ok(employeeDTO1))
-               .orElseThrow(()->new NoSuchElementException());
+               .orElseThrow(()->new ResourceNotFoundExcp("Ish EmpId ka koi employee nhi h "+empID));
     }
 
 
@@ -48,7 +49,7 @@ public class EmployeeController {
 
     //http://localhost:8080/employees/2
     @PutMapping(path = "/{employeeId}")
-    public ResponseEntity<EmployeeDTO> updateEmpById(@RequestBody EmployeeDTO empDTO,@PathVariable(name = "employeeId")Long Id){
+    public ResponseEntity<EmployeeDTO> updateEmpById(@RequestBody @Valid EmployeeDTO empDTO,@PathVariable(name = "employeeId")Long Id){
         EmployeeDTO updateDto=   employeeServiceObj.updateEmpById(empDTO,Id);
         return ResponseEntity.ok(updateDto);
     }

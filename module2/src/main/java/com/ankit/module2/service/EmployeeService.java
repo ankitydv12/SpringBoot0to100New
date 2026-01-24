@@ -5,6 +5,7 @@
 *  */
 
 package com.ankit.module2.service;
+import com.ankit.module2.Exceptions.ResourceNotFoundExcp;
 import com.ankit.module2.dto.EmployeeDTO;
 import com.ankit.module2.entities.EmployeeEntity;
 import com.ankit.module2.repositories.EmployeeRepository;
@@ -37,6 +38,7 @@ public class EmployeeService {
 
     public List<EmployeeDTO> getAllEmployee() {
         List<EmployeeEntity> empEntityList = employeeRepository.findAll();
+        if (empEntityList==null) throw new ResourceNotFoundExcp("No Employee is in data base");
         return empEntityList
                 .stream()
                 .map(employeeEntity -> modelMapperObj.map(employeeEntity,EmployeeDTO.class))
@@ -49,7 +51,9 @@ public class EmployeeService {
         return modelMapperObj.map(inputempEntity, EmployeeDTO.class);
     }
 
-    public EmployeeDTO updateEmpById(EmployeeDTO empDTO, Long id) {
+    public EmployeeDTO   updateEmpById(EmployeeDTO empDTO, Long id) {
+        boolean exits = isExistsByEmployeeId(id);
+        if(!exits) throw new ResourceNotFoundExcp("(Exception from the Service layer )UpdateEmpById is fail because Resource is not found "+id);
         EmployeeEntity emp = modelMapperObj.map(empDTO,EmployeeEntity.class);
         emp.setId(id);
         return  modelMapperObj.map(employeeRepository.save(emp),EmployeeDTO.class);
@@ -57,18 +61,14 @@ public class EmployeeService {
 
     public boolean deleteEmployeeById(Long id)
     {
-        try {
-            boolean exits = employeeRepository.existsById(id);
-            if(!exits) return false;
+            isExistsByEmployeeId(id);
             employeeRepository.deleteById(id);
             return true;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     public EmployeeDTO updatePartialEmployeeById(Long employeeId, Map<String, Object> updates) {
-        isExistsByEmployeeId(employeeId);
+        boolean exit = isExistsByEmployeeId(employeeId);
         EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).get();
         updates.forEach((field, value) -> {
             Field fieldToBeUpdated = ReflectionUtils.getRequiredField(EmployeeEntity.class, field);
@@ -79,6 +79,8 @@ public class EmployeeService {
     }
 
     private boolean isExistsByEmployeeId(Long employeeId) {
-        return employeeRepository.existsById(employeeId);
+        boolean exits= employeeRepository.existsById(employeeId);
+        if(!exits) throw new ResourceNotFoundExcp("Unable to Delete because Id is not found");
+        return exits;
     }
 }
