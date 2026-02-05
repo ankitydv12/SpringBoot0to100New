@@ -23,40 +23,40 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundExcp.class)
-    public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundExcp exception)
+    public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(ResourceNotFoundExcp exception)
     {
-        ApiError apiError = ApiError.builder()
-                .status(HttpStatus.NOT_FOUND) //set the status of the ApiError Class
-                .message(exception.getMessage()) // set the message of the ApiError class
-                .build(); // this will creat the object  of the api class
-        return new ResponseEntity<>(apiError,HttpStatus.NOT_FOUND);
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.NOT_FOUND); //set the status of the ApiError Class
+        apiError.setMessage(exception.getMessage()); // set the message of the ApiError class
+        ApiResponse<Object> apiResponse = new ApiResponse<>(apiError);
+        return new ResponseEntity<>(apiResponse,HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleInternalServerError(Exception exception)
+    public ResponseEntity<ApiResponse> handleInternalServerError(Exception exception)
     {
-        ApiError apiError = ApiError.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .message(exception.getMessage())
-                .build();
-        return new ResponseEntity<>(apiError,HttpStatus.INTERNAL_SERVER_ERROR);
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        apiError.setMessage(exception.getMessage());
+        ApiResponse<Object> apiResponse = new ApiResponse<>(apiError);
+        return new ResponseEntity<>(apiResponse,HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValdationErrors(MethodArgumentNotValidException exception)
+    public ResponseEntity<ApiResponse> handleValdationErrors(MethodArgumentNotValidException exception)
     {
         List<String> errors = exception.getBindingResult()//bind the result into one
                 .getAllErrors()
                 .stream()
                 .map(error->error.getDefaultMessage())
                 .collect(Collectors.toList());
-        ApiError apiError = ApiError.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .message(errors.toString())
-                .subError(errors)
-                .build();
-        return new ResponseEntity<>(apiError,HttpStatus.BAD_REQUEST);
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.BAD_REQUEST);
+        apiError.setMessage(errors.toString());
+        apiError.setSubError(errors);
+        ApiResponse apiResponse = new ApiResponse(apiError);
+        return new ResponseEntity<>(apiResponse,HttpStatus.BAD_REQUEST);
         /*
          * =========================================================
          * Method: handleValdationErrors
