@@ -1,48 +1,9 @@
-Commit-->3.1-->Spring JPA,Hibernate, Working,Constrain,Index
+Commit-->3.2-->Writing SQL Query
 
-Your Code
-  ↓
-Spring Data JPA
-  ↓
-JPA (Specification)
-  ↓
-Hibernate (Implementation)
-  ↓
-JDBC
-  ↓
-Database
-
-* In a Spring Boot application, JDBC, Hibernate, JPA, and Spring Data JPA work together as layered components,
-each handling a specific responsibility in database interaction. JDBC sits at the lowest level and is responsible for
-establishing connections with the database, executing SQL queries, and returning raw results,
-but it requires developers to write SQL and manually map data.
-
-* JPA (Java Persistence API) sits above JDBC as a specification, not an implementation; it defines standard
-rules, annotations, and interfaces for object–relational mapping so that Java objects can be mapped to
-database tables in a consistent way.
-
-* Hibernate is a concrete implementation of the JPA specification and acts as the actual ORM engine—it
-converts Java entities into SQL queries, manages entity life cycles, handles caching, dirty checking, and
-relationships, and then uses JDBC internally to execute those queries on the database.
-
-* Spring Data JPA sits at the top as a productivity and abstraction layer; it builds on JPA and Hibernate
-to eliminate boilerplate DAO code by automatically generating repository implementations, providing CRUD
-operations, pagination, sorting, and query derivation.
-
-* In short, Spring Data JPA simplifies development, JPA defines the rules, Hibernate performs the ORM work,
-and JDBC finally talks to the database, all working together to provide a clean, scalable, and
-industry-standard persistence solution.
-
-Adding Constrain and Index
-@Table(
-        name = "product_table",
-        //adding constrain
-        uniqueConstraints = {
-                @UniqueConstraint(name = "sku_unique",columnNames = {"sku"}),
-                @UniqueConstraint(name = "title_price_unique",columnNames = {"name","price"})
-        },
-        //adding index
-        indexes = {
-                @Index(name = "skuIndex",columnList = "sku")
-        }
-)
+Query Through Hibernate:
+        Add these property in application.properties
+            spring.jpa.defer-datasource-initialization=true     --> tell that data source is initialized by us
+            spring.sql.init.mode=always                         --> tell that data is  always initialized by here
+            spring.sql.init.data-locations=classpath:data.sql   -->//path for data location
+        make a data.sql file in resource:
+            Write Query  in the data.sql
