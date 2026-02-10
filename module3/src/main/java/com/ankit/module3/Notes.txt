@@ -1,22 +1,30 @@
-Commit-->3.2--> Query Creation(Complete 3.2)
-Note -> The Detail Notes is in notebook
+Commit-->3.4-->Sorting
 
-Query can be Created by 2 ways:
-    By deriving the query from the method name directly.
-    By using a manually defined query.
+This commit consist how to sort the data on different parameter:
 
-Rules for Method Names
-1. The name of our query method must start with one of the following
-prefixes: find...By, read...By, query...By, and get...By.
-Examples: findByName, readByName, queryByName, getByName
-2. If we want to limit the number of returned query results, we can
-add the First or the Top keyword before the first By word.
-Examples: findFirstByName, readFirst2ByName, findTop10ByName
-3. If we want to select unique results, we have to add the Distinct
-keyword before the first By word.
-Examples: findDistinctByName or findNameDistinctBy
-4. Combine property expression with AND and OR.
-Examples: findByNameOrDescription, findByNameAndDescription
-5. Checkout the Official Doc for more info:
-https://docs.spring.io/spring-data/jpa/reference/repositories/querykeywords-reference.html
+   * we can sort the data by using dedicated query method like findByOrderByNameAsc() or findAllByOrderByNameDesc() like this
+     but query method are overloaded with Sort parameter findByDepartment(String department, Sort sort):
+   * Sorting is done by frontent like sort by the quantity , name of the product  and the implementation of the sorting in the backend
+     To implement Sorting we have pass one more extra permeter to the query method that is Sort
+    @Repository
+    public interface EmployeeRepository extends JpaRepository<Employee,
+    Long> {
+    List<Employee> findByDepartment(String department, Sort sort);
+    }
+
+   * Working:
+         The Controller method accept the requestParam that hold the varibale on which sorting is need to be done also provide the default value of the  requestParam
+         sorting is done on the defaultValue in case of the requestParam is not provided
+         Get the Object of the Sort Class by the Sort.by()
+         Pass the requestParam to the Sort.by() -->  Sort.by(requestParam)
+
+   * productRepo.findBy(Sort.by(Sort.Direction.DESC,sortBy,"price"));
+      Sort.Direction.DESC  --> Sorting Order
+      sortBy               --> Sorting Criteria
+      "price"              --> if two product has same sortBy criteria then sorting done on the price
+
+
+
+
+
 
