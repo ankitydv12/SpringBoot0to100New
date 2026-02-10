@@ -1,9 +1,22 @@
-Commit-->3.2-->Writing SQL Query
+Commit-->3.2--> Query Creation(Complete 3.2)
+Note -> The Detail Notes is in notebook
 
-Query Through Hibernate:
-        Add these property in application.properties
-            spring.jpa.defer-datasource-initialization=true     --> tell that data source is initialized by us
-            spring.sql.init.mode=always                         --> tell that data is  always initialized by here
-            spring.sql.init.data-locations=classpath:data.sql   -->//path for data location
-        make a data.sql file in resource:
-            Write Query  in the data.sql
+Query can be Created by 2 ways:
+    By deriving the query from the method name directly.
+    By using a manually defined query.
+
+Rules for Method Names
+1. The name of our query method must start with one of the following
+prefixes: find...By, read...By, query...By, and get...By.
+Examples: findByName, readByName, queryByName, getByName
+2. If we want to limit the number of returned query results, we can
+add the First or the Top keyword before the first By word.
+Examples: findFirstByName, readFirst2ByName, findTop10ByName
+3. If we want to select unique results, we have to add the Distinct
+keyword before the first By word.
+Examples: findDistinctByName or findNameDistinctBy
+4. Combine property expression with AND and OR.
+Examples: findByNameOrDescription, findByNameAndDescription
+5. Checkout the Official Doc for more info:
+https://docs.spring.io/spring-data/jpa/reference/repositories/querykeywords-reference.html
+
