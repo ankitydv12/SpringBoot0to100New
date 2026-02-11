@@ -1,30 +1,20 @@
-Commit-->3.4-->Sorting
+Commit-->3.4.2-->Pagination
 
-This commit consist how to sort the data on different parameter:
+                        Key Concepts of Pagination
+• Page: A single chunk of data that contains a subset of the total
+dataset. It is an interface representing a page of data, including
+information about the total number of pages, total number of
+elements, and the current page's data.
+• Pageable: An interface that provides pagination information such as
+page number, page size, and sorting options.
+• PageRequest: A concrete implementation of Pageable that provides
+methods to create pagination and sorting information.
 
-   * we can sort the data by using dedicated query method like findByOrderByNameAsc() or findAllByOrderByNameDesc() like this
-     but query method are overloaded with Sort parameter findByDepartment(String department, Sort sort):
-   * Sorting is done by frontent like sort by the quantity , name of the product  and the implementation of the sorting in the backend
-     To implement Sorting we have pass one more extra permeter to the query method that is Sort
-    @Repository
-    public interface EmployeeRepository extends JpaRepository<Employee,
-    Long> {
-    List<Employee> findByDepartment(String department, Sort sort);
-    }
-
-   * Working:
-         The Controller method accept the requestParam that hold the varibale on which sorting is need to be done also provide the default value of the  requestParam
-         sorting is done on the defaultValue in case of the requestParam is not provided
-         Get the Object of the Sort Class by the Sort.by()
-         Pass the requestParam to the Sort.by() -->  Sort.by(requestParam)
-
-   * productRepo.findBy(Sort.by(Sort.Direction.DESC,sortBy,"price"));
-      Sort.Direction.DESC  --> Sorting Order
-      sortBy               --> Sorting Criteria
-      "price"              --> if two product has same sortBy criteria then sorting done on the price
-
-
-
-
-
-
+                                Using Pageable
+public interface UserRepository extends JpaRepository<User, Long> {
+Page<User> findAll(Pageable pageable);
+Page<User> findByLastName(String lastName, Pageable pageable);
+}
+Creating Pageable instance:
+Pageable pageable = PageRequest.of(pageNumber, size,
+Sort.by("lastName").ascending());

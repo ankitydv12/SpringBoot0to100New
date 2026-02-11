@@ -1,6 +1,8 @@
 package com.ankit.module3.repository;
 
 import com.ankit.module3.entities.Products;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +19,8 @@ import java.util.Optional;
 @Repository
 public interface ProductRepo extends JpaRepository<Products, Long> {
     List<Products> findBy(Sort sortBy);
+
+    Page<Products> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
 //    List<Products> findByCreatedAtAfter(LocalDateTime of);
 //

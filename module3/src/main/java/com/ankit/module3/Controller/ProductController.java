@@ -2,6 +2,9 @@ package com.ankit.module3.Controller;
 
 import com.ankit.module3.entities.Products;
 import com.ankit.module3.repository.ProductRepo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,19 +24,36 @@ public class ProductController {
 
     //http://localhost:8080/products?sortBy=sku we can pass the value from the url
     @GetMapping
-    public List<Products> getAllProduct(@RequestParam(defaultValue = "id") String sortBy){
-       /*
-       * 1st Way
-       * Sort.Direction.DESC  --> Sorting Order
-       * sortBy               --> Sorting Criteria
-       * "price"              --> if two product has same sortBy criteria then sorting done on the price
-       */
-//        return productRepo.findBy(Sort.by(Sort.Direction.DESC,sortBy,"price"));
+    public Page<Products> getAllProduct(@RequestParam(defaultValue = "id") String sortBy ,
+                                        @RequestParam(defaultValue = "0") Integer page,
+                                        @RequestParam(defaultValue = " ") String title) {
 
-//2nd way
-        return productRepo.findBy(Sort.by(
-                Sort.Order.desc(sortBy),
-                Sort.Order.asc("price")
-        ));
+        Pageable pageable = PageRequest.of(page,5,Sort.by(sortBy).ascending());
+//        return productRepo.findAll(pageable);
+
+        //adding filter
+        Page<Products> productsPage =productRepo.findByTitleContainingIgnoreCase(title,pageable);
+        //Page contain the various attribute which can be access through function
+        /*
+        * content : [],
+          "last": true,
+          "totalPages": 2,
+          "totalElements": 6,
+          "size": 5,
+          "number": 1,
+          "first": false,
+          "numberOfElements": 1,
+          "sort": {
+            "empty": false,
+            "sorted": true,
+            "unsorted": false
+          },
+          "empty": false
+        */
+        System.out.println(productsPage.getTotalPages());
+        System.out.println(productsPage.getContent());
+
+
+        return productsPage;
     }
 }
