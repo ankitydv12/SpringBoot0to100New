@@ -1,10 +1,5 @@
-Commit-->3.5 Projection , Interface Projection
-Projection: Projections are a method to selectively retrieve a subset of data from a database
-    Spring supports several types of projections:
-      * Interface-based Projections:
-        You define a Java interface with getter methods for the fields you need.
-        Spring Data creates a dynamic proxy instance of this interface at runtime for each result returned by the query.
-        When a method is called on the proxy, it forwards the call to an internal handler that retrieves the value from the underlying data source.
+Commit-->3.5.2 Class Based Projection
+
       * Class-based Projections (DTOs/Records):
         You use a Data Transfer Object (DTO) or a Java record with a constructor whose parameter names match the property names of the entity fields you want to retrieve.
         In this case, Spring uses reflection to instantiate and populate the DTOs directly, so no proxying happens.
@@ -12,16 +7,17 @@ Projection: Projections are a method to selectively retrieve a subset of data fr
         This allows you to define the projection type (interface or class) at runtime by passing the Class<T> as a parameter to the repository method.
 
 
-                             * Interface-based Projections *
-1.Define a java Interface which contain the get method of the field which we want to get
-public interface IPatientInfo {
-    Long getUd();
-    String getName(); // method match  to the root
-    String getEmail();
+                             * Class-based Projections (DTOs/Records) *
+1.Define a java Class  which contain the field which we want to get
+public class CPatientConcrete {
+    private final Long id;
+    private final String name;
 }
-2. Used the interface based projection in repository:
-    public interface PatientRepository extends JpaRepository<Patient, Long> {
-    @Query("select p.id as Id, p.name as Name, p.email as Email from Patient p")
-    List<IPatientInfo> getPatientInfo();
+2. Used the Class based projection in repository:
+@Repository
+public interface PatientRepository extends JpaRepository<Patient, Long> {
+    //Class Based Projection
+    @Query("select new com.ankit.module35.dto.CPatientConcrete(p.id,p.name)"+"from Patient p")
+    List<CPatientConcrete> getPatientConcrete();
 }
-3.call the getPatientInfo()
+3.call the getPatientConcrete()

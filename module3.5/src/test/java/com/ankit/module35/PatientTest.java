@@ -1,5 +1,6 @@
 package com.ankit.module35;
 
+import com.ankit.module35.dto.CPatientConcrete;
 import com.ankit.module35.dto.IPatientInfo;
 import com.ankit.module35.entity.Patient;
 import com.ankit.module35.repository.PatientRepository;
@@ -20,5 +21,13 @@ public class PatientTest {
     for (IPatientInfo patient : paitentList){
         System.out.println(patient);
     }
+    }
+
+    @Test
+    public void ClassbasedProjection(){
+        List<CPatientConcrete> cPatientConcretes = patientRepository.getPatientConcrete();
+        cPatientConcretes.forEach(cPatientConcrete -> {
+            System.out.println(cPatientConcrete);
+        });
     }
 }
