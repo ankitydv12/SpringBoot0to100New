@@ -1,23 +1,26 @@
-Commit-->3.5.2 Class Based Projection
-
-      * Class-based Projections (DTOs/Records):
-        You use a Data Transfer Object (DTO) or a Java record with a constructor whose parameter names match the property names of the entity fields you want to retrieve.
-        In this case, Spring uses reflection to instantiate and populate the DTOs directly, so no proxying happens.
-      * Dynamic Projections:
-        This allows you to define the projection type (interface or class) at runtime by passing the Class<T> as a parameter to the repository method.
+Commit-->3.5.2 Projection On Aggregate Query
 
 
-                             * Class-based Projections (DTOs/Records) *
-1.Define a java Class  which contain the field which we want to get
-public class CPatientConcrete {
-    private final Long id;
-    private final String name;
+
+                             * Projection On Aggregate Query *
+1.Define a java Class  which contain the field which we want to get from the database
+@Data
+public class BloodGroupCount {
+    private final BloodGroupType bloodGroupType;
+    private  final  Long Count;
 }
-2. Used the Class based projection in repository:
-@Repository
-public interface PatientRepository extends JpaRepository<Patient, Long> {
-    //Class Based Projection
-    @Query("select new com.ankit.module35.dto.CPatientConcrete(p.id,p.name)"+"from Patient p")
-    List<CPatientConcrete> getPatientConcrete();
-}
-3.call the getPatientConcrete()
+2. Used the class in repository:
+    //Aggregate Query
+    @Query("select  new com.ankit.module35.dto.BloodGroupCount(p.bloodGroup, count(p)) from Patient p group by p.bloodGroup order by count(p) DESC ")
+    List<BloodGroupCount>  getBloodGroupCount();
+
+3.call the getBloodGroupCount()
+
+
+                        * Update the Query *
+1. Define this in the Repository
+    Note: ':' is used in the query to giving the parameter
+ @Modifying //tells jpa repository that this is going to modify the database
+    @Transactional // make sure that transaction is fully completed or fully fail
+    @Query("UPDATE Patient p set p.name = :name where p.id = :id ")
+    int updatePatientNameWithId(@Param("name") String name,@Param("id")Long id);
