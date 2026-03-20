@@ -48,6 +48,4 @@ public class PatientTest {
         int res = patientRepository.updatePatientNameWithId("Ankit Yadav",Long.valueOf(4));
         System.out.println(res);
     }
-
-
 }

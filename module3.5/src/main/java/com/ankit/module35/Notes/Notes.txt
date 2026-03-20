@@ -1,0 +1,25 @@
+Commit-->3.7 MappingAndTableCreation
+
+In this commit we learn how to create mapping(OneToOne Mapping)
+    Patient---->OneToOneMapping--->Insurance
+
+    Patient is owing side the relationship(because it has foreign key ) and Insurance is called Inverse Side
+
+    Add Relationship on the owing side i.e Patient side
+            //mapping to Insurence
+            @OneToOne
+            private Insurance insurance;
+    Adding this in Patient Table and  Hibernate make the relation
+    The Name of the Foreign Col is "Insurance_id" . Hibernate Name the  col  by concating the Insurace Col of Patient with the id of Insurance
+
+
+                         * Bidrectional mapping *
+In the Bidirectional Mapping we have to access from both side .
+Access Insurance From Patient and Patient From the Insurance but we need to define which side is owing side and which is Inverse Side
+    How ? ==> add mappdedBy argument to @OneToOne Annotation
+              @OneToOne(mappedBy="insurence")
+              private Patient patient;
+The insurance_id col is join col and we can change the behaviour and properties on the owing side by adding the
+@JoinColumn(name "abc" , unique = true); --> the will make the col name is abc
+
+

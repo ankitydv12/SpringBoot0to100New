@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data //--> @Getter , @Setter , @ToString , @EqualsAndHashCode , @RequiredArgsConstructor
@@ -31,4 +32,12 @@ public class Patient{
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    //mapping to Insurence
+    @OneToOne
+    @JoinColumn(name = "patient_insurence",unique = true) // insurance is join col and its behavior can be change using @JoinColumn()
+    private Insurance insurance;
+
+    @OneToMany(mappedBy = "patient")
+    private List<Appointment> appointment; //inverse side
 }
