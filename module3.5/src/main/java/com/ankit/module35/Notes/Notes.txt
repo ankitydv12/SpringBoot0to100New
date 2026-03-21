@@ -1,25 +1,191 @@
-Commit-->3.7 MappingAndTableCreation
+Commit-->3.8 TRANSACTION&CASCADING
+/*
+===========================================
+        TRANSACTION & CASCADING NOTES
+        (Spring Boot + Hibernate)
+===========================================
 
-In this commit we learn how to create mapping(OneToOne Mapping)
-    Patient---->OneToOneMapping--->Insurance
+-------------------------------------------
+1. WHAT IS A TRANSACTION?
+-------------------------------------------
 
-    Patient is owing side the relationship(because it has foreign key ) and Insurance is called Inverse Side
+A transaction represents a single unit of work in a database.
 
-    Add Relationship on the owing side i.e Patient side
-            //mapping to Insurence
-            @OneToOne
-            private Insurance insurance;
-    Adding this in Patient Table and  Hibernate make the relation
-    The Name of the Foreign Col is "Insurance_id" . Hibernate Name the  col  by concating the Insurace Col of Patient with the id of Insurance
+It follows ACID properties:
+- Atomicity   → Either all operations succeed or none
+- Consistency → DB remains valid before and after
+- Isolation   → Transactions don’t interfere
+- Durability  → Once committed, changes are permanent
 
-
-                         * Bidrectional mapping *
-In the Bidirectional Mapping we have to access from both side .
-Access Insurance From Patient and Patient From the Insurance but we need to define which side is owing side and which is Inverse Side
-    How ? ==> add mappdedBy argument to @OneToOne Annotation
-              @OneToOne(mappedBy="insurence")
-              private Patient patient;
-The insurance_id col is join col and we can change the behaviour and properties on the owing side by adding the
-@JoinColumn(name "abc" , unique = true); --> the will make the col name is abc
+In Spring Boot:
+- @Transactional ensures method runs inside a transaction
+- Transaction starts when method begins
+- Transaction commits when method ends successfully
+- If exception occurs → rollback happens
 
 
+-------------------------------------------
+2. FLOW OF @Transactional IN THIS CODE
+-------------------------------------------
+
+@Transactional
+public void assignInsurance(Long Id, Insurance insurance){
+    Patient patient = patientRepository.findById(Id).orElseThrow();
+    patient.setInsurance(insurance);
+    insurance.setPatient(patient);
+}
+
+Execution Flow:
+1. Transaction STARTS
+2. Patient is fetched from DB → becomes MANAGED entity
+3. Insurance object is NEW (TRANSIENT state)
+4. Relationship is set between Patient and Insurance
+5. Hibernate tracks changes (Dirty Checking)
+6. Transaction COMMIT happens at method end
+7. Hibernate generates SQL automatically:
+   - INSERT into insurance table
+   - UPDATE patient table (foreign key)
+
+No explicit save() is required.
+-------------------------------------------
+3. DIRTY CHECKING (VERY IMPORTANT)
+-------------------------------------------
+
+Definition:
+Hibernate automatically detects changes made to managed entities.
+Key Points:
+- Works only inside a transaction
+- No need to call save() explicitly
+- Hibernate compares object state before & after
+
+Example:
+patient.setInsurance(insurance);
+Hibernate detects this change and updates DB automatically.
+Interview Line:
+"Dirty checking allows Hibernate to automatically persist changes
+without explicitly calling save() inside a transaction."
+-------------------------------------------
+4. ENTITY STATES IN HIBERNATE
+-------------------------------------------
+1. Transient  → New object (not in DB)
+2. Managed    → Attached to persistence context
+3. Detached   → Was managed, but no longer tracked
+4. Removed    → Marked for deletion
+In this code:
+- Patient → Managed
+- Insurance → Transient → becomes Managed after cascade
+-------------------------------------------
+5. WHAT IS CASCADING?
+-------------------------------------------
+Cascade = Propagation of operations from parent → child entity
+Annotation:
+@OneToOne(cascade = CascadeType.ALL)
+Means:
+If operation is performed on Patient,
+same operation is automatically applied on Insurance.
+
+CascadeType.ALL includes:
+- PERSIST
+- MERGE
+- REMOVE
+- REFRESH
+- DETACH
+-------------------------------------------
+6. HOW CASCADE WORKS IN THIS CODE
+-------------------------------------------
+You only wrote:
+patient.setInsurance(insurance);
+But Hibernate does:
+- INSERT insurance automatically
+WHY?
+Because of:
+cascade = CascadeType.ALL
+Without cascade:
+- You must manually save child entity
+- Otherwise → Exception occurs
+Example error:
+"Transient object reference"
+-------------------------------------------
+7. WHAT IF CASCADE IS REMOVED?
+-------------------------------------------
+If you remove:
+@OneToOne(cascade = CascadeType.ALL)
+Then this will FAIL:
+patient.setInsurance(insurance);
+You must write:
+insuranceRepository.save(insurance);
+Otherwise:
+Hibernate throws error because child is not persisted.
+-------------------------------------------
+8. BIDIRECTIONAL MAPPING (CRITICAL)
+-------------------------------------------
+You wrote:
+patient.setInsurance(insurance);
+insurance.setPatient(patient);
+Reason:
+JPA does NOT automatically sync both sides.
+If you update only one side:
+- DB might still work
+- But Java object graph becomes inconsistent
+Best Practice:
+Always maintain BOTH sides manually.
+-------------------------------------------
+9. BEST PRACTICE (INDUSTRY STANDARD)
+-------------------------------------------
+Instead of setting both sides in service layer,
+define helper method inside entity:
+
+In Patient class:
+public void assignInsurance(Insurance insurance){
+    this.insurance = insurance;
+    insurance.setPatient(this);
+}
+Benefits:
+- Cleaner code
+- Prevents bugs
+- Ensures consistency
+
+-------------------------------------------
+10. COMMON MISCONCEPTIONS
+-------------------------------------------
+Wrong:
+"Hibernate creates insurance object"
+Correct:
+- Developer creates object
+- Hibernate only persists it
+-------------------------------------------
+11. SQL GENERATED (INTERNALLY)
+-------------------------------------------
+Hibernate executes queries at COMMIT time:
+1. INSERT INTO insurance (...)
+2. UPDATE patient SET patient_insurence = ?
+-------------------------------------------
+12. INTERVIEW QUESTIONS
+-------------------------------------------
+Q1. Why save() is not required inside @Transactional?
+→ Because of dirty checking
+Q2. What is persistence context?
+→ It is a cache where Hibernate tracks managed entities
+Q3. What is cascade?
+→ Propagation of operations from parent to child
+Q4. What happens without cascade?
+→ Child entity must be saved manually
+Q5. Why set both sides in relationship?
+→ To keep object graph consistent
+Q6. When does Hibernate execute SQL?
+→ At transaction commit
+
+
+-------------------------------------------
+13. MEMORY TRICKS
+-------------------------------------------
+Transaction:
+"Everything or nothing"
+Cascade:
+"Parent acts → Child follows"
+Dirty Checking:
+"Change object → Hibernate auto updates DB"
+-------------------------------------------
+END OF NOTES
+-------------------------------------------
+*/

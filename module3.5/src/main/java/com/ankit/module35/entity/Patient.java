@@ -34,7 +34,7 @@ public class Patient{
     private LocalDateTime createdAt;
 
     //mapping to Insurence
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "patient_insurence",unique = true) // insurance is join col and its behavior can be change using @JoinColumn()
     private Insurance insurance;
 
