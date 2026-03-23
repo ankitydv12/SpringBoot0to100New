@@ -1,190 +1,157 @@
-Commit-->3.8 Completed
+Commit-->3.8 ORPHANREMOVAL
 /*
 ===========================================
-        TRANSACTION & CASCADING NOTES
-        (Spring Boot + Hibernate)
+        ORPHAN REMOVAL IN JPA
 ===========================================
-
 -------------------------------------------
-1. WHAT IS A TRANSACTION?
+1. WHAT IS ORPHAN REMOVAL?
 -------------------------------------------
+orphanRemoval = true means:
+"If a child entity is no longer referenced
+by its parent, Hibernate will automatically
+DELETE that child from the database."
 
-A transaction represents a single unit of work in a database.
-
-It follows ACID properties:
-- Atomicity   → Either all operations succeed or none
-- Consistency → DB remains valid before and after
-- Isolation   → Transactions don’t interfere
-- Durability  → Once committed, changes are permanent
-
-In Spring Boot:
-- @Transactional ensures method runs inside a transaction
-- Transaction starts when method begins
-- Transaction commits when method ends successfully
-- If exception occurs → rollback happens
-
-
+In simple words:
+Parent removes child → child is deleted from DB
 -------------------------------------------
-2. FLOW OF @Transactional IN THIS CODE
+2. YOUR CODE CONTEXT
 -------------------------------------------
+@Entity
+public class Patient {
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "patient_insurence", unique = true)
+    private Insurance insurance;
+}
+Service Method:
 
 @Transactional
-public void assignInsurance(Long Id, Insurance insurance){
+public Patient removeInsurance(Long Id){
     Patient patient = patientRepository.findById(Id).orElseThrow();
-    patient.setInsurance(insurance);
-    insurance.setPatient(patient);
+    patient.setInsurance(null);
+    return patient;
 }
-
-Execution Flow:
+-------------------------------------------
+3. WHAT HAPPENS INTERNALLY (STEP-BY-STEP)
+-------------------------------------------
 1. Transaction STARTS
-2. Patient is fetched from DB → becomes MANAGED entity
-3. Insurance object is NEW (TRANSIENT state)
-4. Relationship is set between Patient and Insurance
-5. Hibernate tracks changes (Dirty Checking)
-6. Transaction COMMIT happens at method end
-7. Hibernate generates SQL automatically:
-   - INSERT into insurance table
-   - UPDATE patient table (foreign key)
+2. Patient is fetched → becomes MANAGED entity
+3. Existing Insurance is linked to Patient
+4. You do:
+       patient.setInsurance(null);
 
-No explicit save() is required.
--------------------------------------------
-3. DIRTY CHECKING (VERY IMPORTANT)
--------------------------------------------
+5. Hibernate detects:
+   - Relationship is broken
+   - Child (Insurance) has NO parent now
 
-Definition:
-Hibernate automatically detects changes made to managed entities.
-Key Points:
-- Works only inside a transaction
-- No need to call save() explicitly
-- Hibernate compares object state before & after
+6. Since orphanRemoval = true:
+   → Hibernate marks Insurance for DELETE
 
-Example:
-patient.setInsurance(insurance);
-Hibernate detects this change and updates DB automatically.
-Interview Line:
-"Dirty checking allows Hibernate to automatically persist changes
-without explicitly calling save() inside a transaction."
--------------------------------------------
-4. ENTITY STATES IN HIBERNATE
--------------------------------------------
-1. Transient  → New object (not in DB)
-2. Managed    → Attached to persistence context
-3. Detached   → Was managed, but no longer tracked
-4. Removed    → Marked for deletion
-In this code:
-- Patient → Managed
-- Insurance → Transient → becomes Managed after cascade
--------------------------------------------
-5. WHAT IS CASCADING?
--------------------------------------------
-Cascade = Propagation of operations from parent → child entity
-Annotation:
-@OneToOne(cascade = CascadeType.ALL)
-Means:
-If operation is performed on Patient,
-same operation is automatically applied on Insurance.
+7. On transaction COMMIT:
+   Hibernate executes:
 
-CascadeType.ALL includes:
-- PERSIST
-- MERGE
-- REMOVE
-- REFRESH
-- DETACH
+       DELETE FROM insurance WHERE id = ?
+
+Result:
+✔ Insurance row is permanently deleted
 -------------------------------------------
-6. HOW CASCADE WORKS IN THIS CODE
+4. WHY IS IT CALLED "ORPHAN"?
 -------------------------------------------
-You only wrote:
-patient.setInsurance(insurance);
-But Hibernate does:
-- INSERT insurance automatically
-WHY?
-Because of:
-cascade = CascadeType.ALL
-Without cascade:
-- You must manually save child entity
-- Otherwise → Exception occurs
-Example error:
-"Transient object reference"
+Orphan = child without parent
+Before:
+Patient → Insurance (valid relation)
+After:
+Patient → null
+Insurance → no parent
+👉 Insurance becomes an "ORPHAN"
+👉 Hibernate deletes it automatically
 -------------------------------------------
-7. WHAT IF CASCADE IS REMOVED?
+5. DIFFERENCE: CASCADE REMOVE vs ORPHAN REMOVAL
 -------------------------------------------
-If you remove:
-@OneToOne(cascade = CascadeType.ALL)
-Then this will FAIL:
-patient.setInsurance(insurance);
-You must write:
-insuranceRepository.save(insurance);
+CascadeType.REMOVE:
+- Triggered when parent is DELETED
+- Example:
+      delete(patient)
+      → deletes insurance
+
+orphanRemoval = true:
+- Triggered when relationship is BROKEN
+- Example:
+      patient.setInsurance(null)
+      → deletes insurance
+
+-------------------------------------------
+KEY DIFFERENCE:
+-------------------------------------------
+Cascade REMOVE → parent deleted
+Orphan Removal → relationship removed
+-------------------------------------------
+6. IMPORTANT CONDITION
+-------------------------------------------
+orphanRemoval works ONLY when:
+✔ Parent is a MANAGED entity
+✔ Change happens inside @Transactional
+✔ Relationship is broken from parent side
 Otherwise:
-Hibernate throws error because child is not persisted.
+❌ No deletion happens
 -------------------------------------------
-8. BIDIRECTIONAL MAPPING (CRITICAL)
+7. COMMON MISTAKE
 -------------------------------------------
-You wrote:
-patient.setInsurance(insurance);
-insurance.setPatient(patient);
-Reason:
-JPA does NOT automatically sync both sides.
-If you update only one side:
-- DB might still work
-- But Java object graph becomes inconsistent
-Best Practice:
-Always maintain BOTH sides manually.
--------------------------------------------
-9. BEST PRACTICE (INDUSTRY STANDARD)
--------------------------------------------
-Instead of setting both sides in service layer,
-define helper method inside entity:
-
-In Patient class:
-public void assignInsurance(Insurance insurance){
-    this.insurance = insurance;
-    insurance.setPatient(this);
-}
-Benefits:
-- Cleaner code
-- Prevents bugs
-- Ensures consistency
-
--------------------------------------------
-10. COMMON MISCONCEPTIONS
--------------------------------------------
-Wrong:
-"Hibernate creates insurance object"
+Wrong assumption:
+"Setting null just removes relation"
 Correct:
-- Developer creates object
-- Hibernate only persists it
+With orphanRemoval = true
+→ It DELETES the child from DB
 -------------------------------------------
-11. SQL GENERATED (INTERNALLY)
+8. SQL GENERATED
 -------------------------------------------
-Hibernate executes queries at COMMIT time:
-1. INSERT INTO insurance (...)
-2. UPDATE patient SET patient_insurence = ?
+Hibernate executes:
+UPDATE patient SET patient_insurence = NULL WHERE id = ?
+DELETE FROM insurance WHERE id = ?
 -------------------------------------------
-12. INTERVIEW QUESTIONS
+NOTE:
 -------------------------------------------
-Q1. Why save() is not required inside @Transactional?
-→ Because of dirty checking
-Q2. What is persistence context?
-→ It is a cache where Hibernate tracks managed entities
-Q3. What is cascade?
-→ Propagation of operations from parent to child
-Q4. What happens without cascade?
-→ Child entity must be saved manually
-Q5. Why set both sides in relationship?
-→ To keep object graph consistent
-Q6. When does Hibernate execute SQL?
-→ At transaction commit
-
-
+First relation is broken, then child is deleted
 -------------------------------------------
-13. MEMORY TRICKS
+9. WHERE TO USE ORPHAN REMOVAL?
 -------------------------------------------
-Transaction:
-"Everything or nothing"
-Cascade:
-"Parent acts → Child follows"
-Dirty Checking:
-"Change object → Hibernate auto updates DB"
+Use when child is COMPLETELY dependent:
+✔ Patient → Insurance
+✔ Order → OrderItems
+✔ User → Address (if tightly coupled)
+-------------------------------------------
+DO NOT USE when:
+-------------------------------------------
+❌ Child has independent life
+Examples:
+- Doctor → Appointment
+- User → Orders (in many systems)
+-------------------------------------------
+10. ORPHAN REMOVAL WITH COLLECTIONS
+-------------------------------------------
+Example:
+@OneToMany(orphanRemoval = true)
+private List<Appointment> appointments;
+If you do:
+appointments.remove(appointment);
+👉 Hibernate will DELETE that appointment
+-------------------------------------------
+11. INTERVIEW QUESTIONS
+-------------------------------------------
+Q1. What is orphanRemoval?
+→ Deletes child when removed from parent
+Q2. Difference between cascade remove and orphanRemoval?
+→ Cascade → parent delete
+→ Orphan → relationship removal
+Q3. Does orphanRemoval work without transaction?
+→ No
+Q4. Is orphanRemoval safe?
+→ Yes, only for dependent entities
+-------------------------------------------
+12. MEMORY TRICK
+-------------------------------------------
+"Remove reference → Remove row"
+"Orphan = no parent = delete"
 -------------------------------------------
 END OF NOTES
 -------------------------------------------

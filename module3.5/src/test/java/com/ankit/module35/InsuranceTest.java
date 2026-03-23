@@ -21,7 +21,11 @@ public class InsuranceTest {
                 .provider("HDFC insurence")
                 .policyNumber("HDFC_123")
                 .validUntil(LocalDate.of(2030,1,1)).build();
-        insurenceService.assignInsurance(1L,insurance);
+        insurenceService.assignInsurance(65L,insurance);
     }
 
+    @Test
+    public void removeAppointmentFromPatient(){
+        insurenceService.removeInsurance(65L);
+    }
 }
