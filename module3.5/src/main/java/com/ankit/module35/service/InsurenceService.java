@@ -20,4 +20,6 @@ public class InsurenceService {
         patient.setInsurance(insurance);//the patient instance is automatically created by hibernate it perform the transaction and after that check the dirty commit to synchronise the db it create the insurance instance
         insurance.setPatient(patient);
     }
+
+
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.engine.internal.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -27,6 +28,6 @@ public class Doctor {
     @Column(nullable = false,unique = true,length = 200)
     private String email;
     private LocalDateTime created_at;
-    @OneToMany(mappedBy = "doctor_id")
+    @OneToMany(mappedBy = "doctor_id", cascade = CascadeType.REMOVE)
     private Set<Appointment> appointments= new HashSet<>();
 }

@@ -9,7 +9,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Data //--> @Getter , @Setter , @ToString , @EqualsAndHashCode , @RequiredArgsConstructor
@@ -39,5 +41,5 @@ public class Patient{
     private Insurance insurance;
 
     @OneToMany(mappedBy = "patient")
-    private List<Appointment> appointment; //inverse side
+    private Set<Appointment> appointment = new HashSet<>(); //inverse side
 }

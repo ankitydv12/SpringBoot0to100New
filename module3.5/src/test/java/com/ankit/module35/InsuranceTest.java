@@ -1,6 +1,7 @@
 package com.ankit.module35;
 
 import com.ankit.module35.entity.Insurance;
+import com.ankit.module35.entity.Patient;
 import com.ankit.module35.service.InsurenceService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import org.junit.jupiter.api.Test;
@@ -22,4 +23,5 @@ public class InsuranceTest {
                 .validUntil(LocalDate.of(2030,1,1)).build();
         insurenceService.assignInsurance(1L,insurance);
     }
+
 }

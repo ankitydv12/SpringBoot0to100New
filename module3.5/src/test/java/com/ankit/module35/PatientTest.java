@@ -5,6 +5,7 @@ import com.ankit.module35.dto.CPatientConcrete;
 import com.ankit.module35.dto.IPatientInfo;
 import com.ankit.module35.entity.Patient;
 import com.ankit.module35.repository.PatientRepository;
+import com.ankit.module35.service.PatientService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,8 @@ import java.util.List;
 public class PatientTest {
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private PatientService patientService;
 
     @Test
     public void testPatient(){
@@ -47,5 +50,11 @@ public class PatientTest {
     {
         int res = patientRepository.updatePatientNameWithId("Ankit Yadav",Long.valueOf(4));
         System.out.println(res);
+    }
+
+    @Test
+    public void deletePatient()
+    {
+        patientService.deletePatient(Long.valueOf(1));
     }
 }
