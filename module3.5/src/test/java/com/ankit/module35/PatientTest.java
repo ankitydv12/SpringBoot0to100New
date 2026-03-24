@@ -57,4 +57,13 @@ public class PatientTest {
     {
         patientService.deletePatient(Long.valueOf(1));
     }
+
+    @Test
+    public void AllPatients()
+    {
+        List<Patient> p = patientService.getAllPatients();
+        for (Patient patient : p){
+            System.out.println(patient);
+        }
+    }
 }

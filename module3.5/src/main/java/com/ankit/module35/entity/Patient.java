@@ -5,6 +5,7 @@ import com.ankit.module35.entity.type.BloodGroupType;
 import jakarta.persistence.*;
 import lombok.Data;
 import jakarta.persistence.Entity;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
@@ -36,10 +37,11 @@ public class Patient{
     private LocalDateTime createdAt;
 
     //mapping to Insurence
-    @OneToOne(cascade = CascadeType.ALL , orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL , orphanRemoval = true) // fetch = FetchType.LAZY call the query to get insurances onlywhen needed
     @JoinColumn(name = "patient_insurence",unique = true) // insurance is join col and its behavior can be change using @JoinColumn()
     private Insurance insurance;
 
-    @OneToMany(mappedBy = "patient",cascade = CascadeType.ALL)
+    @ToString.Exclude // this because it exclude to
+    @OneToMany(mappedBy = "patient",cascade = CascadeType.ALL,fetch =  FetchType.EAGER)
     private Set<Appointment> appointment = new HashSet<>(); //inverse side
 }

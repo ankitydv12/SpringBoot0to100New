@@ -1,157 +1,183 @@
-Commit-->3.8 ORPHANREMOVAL
+Commit-->3.9.2 FetchType|N+1QueryAndOptimization
 /*
 ===========================================
-        ORPHAN REMOVAL IN JPA
+            FETCH TYPE IN JPA
 ===========================================
 -------------------------------------------
-1. WHAT IS ORPHAN REMOVAL?
+1. WHAT IS FETCH TYPE?
 -------------------------------------------
-orphanRemoval = true means:
-"If a child entity is no longer referenced
-by its parent, Hibernate will automatically
-DELETE that child from the database."
+FetchType defines:
+"WHEN Hibernate should load related entities
+from the database"
 
-In simple words:
-Parent removes child → child is deleted from DB
--------------------------------------------
-2. YOUR CODE CONTEXT
--------------------------------------------
-@Entity
-public class Patient {
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "patient_insurence", unique = true)
-    private Insurance insurance;
-}
-Service Method:
-
-@Transactional
-public Patient removeInsurance(Long Id){
-    Patient patient = patientRepository.findById(Id).orElseThrow();
-    patient.setInsurance(null);
-    return patient;
-}
--------------------------------------------
-3. WHAT HAPPENS INTERNALLY (STEP-BY-STEP)
--------------------------------------------
-1. Transaction STARTS
-2. Patient is fetched → becomes MANAGED entity
-3. Existing Insurance is linked to Patient
-4. You do:
-       patient.setInsurance(null);
-
-5. Hibernate detects:
-   - Relationship is broken
-   - Child (Insurance) has NO parent now
-
-6. Since orphanRemoval = true:
-   → Hibernate marks Insurance for DELETE
-
-7. On transaction COMMIT:
-   Hibernate executes:
-
-       DELETE FROM insurance WHERE id = ?
-
-Result:
-✔ Insurance row is permanently deleted
--------------------------------------------
-4. WHY IS IT CALLED "ORPHAN"?
--------------------------------------------
-Orphan = child without parent
-Before:
-Patient → Insurance (valid relation)
-After:
-Patient → null
-Insurance → no parent
-👉 Insurance becomes an "ORPHAN"
-👉 Hibernate deletes it automatically
--------------------------------------------
-5. DIFFERENCE: CASCADE REMOVE vs ORPHAN REMOVAL
--------------------------------------------
-CascadeType.REMOVE:
-- Triggered when parent is DELETED
-- Example:
-      delete(patient)
-      → deletes insurance
-
-orphanRemoval = true:
-- Triggered when relationship is BROKEN
-- Example:
-      patient.setInsurance(null)
-      → deletes insurance
+Two types:
+1. EAGER → load immediately
+2. LAZY  → load only when needed
 
 -------------------------------------------
-KEY DIFFERENCE:
+2. FETCHTYPE.EAGER
 -------------------------------------------
-Cascade REMOVE → parent deleted
-Orphan Removal → relationship removed
--------------------------------------------
-6. IMPORTANT CONDITION
--------------------------------------------
-orphanRemoval works ONLY when:
-✔ Parent is a MANAGED entity
-✔ Change happens inside @Transactional
-✔ Relationship is broken from parent side
-Otherwise:
-❌ No deletion happens
--------------------------------------------
-7. COMMON MISTAKE
--------------------------------------------
-Wrong assumption:
-"Setting null just removes relation"
-Correct:
-With orphanRemoval = true
-→ It DELETES the child from DB
--------------------------------------------
-8. SQL GENERATED
--------------------------------------------
-Hibernate executes:
-UPDATE patient SET patient_insurence = NULL WHERE id = ?
-DELETE FROM insurance WHERE id = ?
--------------------------------------------
-NOTE:
--------------------------------------------
-First relation is broken, then child is deleted
--------------------------------------------
-9. WHERE TO USE ORPHAN REMOVAL?
--------------------------------------------
-Use when child is COMPLETELY dependent:
-✔ Patient → Insurance
-✔ Order → OrderItems
-✔ User → Address (if tightly coupled)
--------------------------------------------
-DO NOT USE when:
--------------------------------------------
-❌ Child has independent life
-Examples:
-- Doctor → Appointment
-- User → Orders (in many systems)
--------------------------------------------
-10. ORPHAN REMOVAL WITH COLLECTIONS
--------------------------------------------
+Definition:
+Related entity is loaded immediately along with parent.
 Example:
-@OneToMany(orphanRemoval = true)
-private List<Appointment> appointments;
-If you do:
-appointments.remove(appointment);
-👉 Hibernate will DELETE that appointment
+@OneToOne(fetch = FetchType.EAGER)
+private Insurance insurance;
+-------------------------------------------
+BEHAVIOR:
+------------------------------------------
+When you fetch Patient:
+
+SELECT * FROM patient;
+SELECT * FROM insurance WHERE id = ?;
+
+👉 Insurance is loaded automatically
+-------------------------------------------
+PROBLEM:
+-------------------------------------------
+- Unnecessary data loading
+- Performance issues
+- Multiple queries (N+1 problem)
+-------------------------------------------
+REALITY:
+-------------------------------------------
+❌ Avoid using EAGER in most cases
+-------------------------------------------
+3. FETCHTYPE.LAZY
+-------------------------------------------
+Definition:
+Related entity is NOT loaded initially.
+It is loaded ONLY when accessed.
+Example:
+@OneToOne(fetch = FetchType.LAZY)
+private Insurance insurance;
+-------------------------------------------
+BEHAVIOR:
+-------------------------------------------
+When fetching Patient:
+SELECT * FROM patient;
+👉 Insurance is NOT loaded
+When you call:
+patient.getInsurance();
+👉 THEN Hibernate runs:
+SELECT * FROM insurance WHERE id = ?;
+-------------------------------------------
+ADVANTAGE:
+-------------------------------------------
+✔ Better performance
+✔ Loads only required data
+-------------------------------------------
+4. DEFAULT FETCH TYPES (VERY IMPORTANT)
+-------------------------------------------
+| Relationship       | Default Fetch |
+|------------------|--------------|
+| @OneToOne         | EAGER        |
+| @ManyToOne        | EAGER        |
+| @OneToMany        | LAZY         |
+| @ManyToMany       | LAZY         |
+
+-------------------------------------------
+INTERVIEW TIP:
+-------------------------------------------
+Always remember:
+ToOne → EAGER
+ToMany → LAZY
+-------------------------------------------
+5. LAZY LOADING INTERNALLY
+-------------------------------------------
+Hibernate uses:
+👉 Proxy objects
+Instead of actual object, it loads:
+Insurance$HibernateProxy
+When accessed → actual query fires
+-------------------------------------------
+6. LAZY INITIALIZATION EXCEPTION
+-------------------------------------------
+Very common error:
+org.hibernate.LazyInitializationException:
+could not initialize proxy - no Session
+-------------------------------------------
+WHEN IT HAPPENS:
+-------------------------------------------
+1. Transaction is closed
+2. You try to access lazy field
+Example:
+Patient p = repository.findById(1);
+session closes
+p.getInsurance(); ❌ ERROR
+-------------------------------------------
+7. HOW TO FIX LAZY ISSUE
+-------------------------------------------
+✔ Solution 1: Use @Transactional
+✔ Solution 2: Use JOIN FETCH in query
+✔ Solution 3: Convert to DTO inside transaction
+-------------------------------------------
+BEST PRACTICE:
+-------------------------------------------
+Never expose entities directly in controller
+-------------------------------------------
+8. N+1 QUERY PROBLEM
+-------------------------------------------
+
+Example:
+    @OneToMany(mappedBy = "patient",cascade = CascadeType.ALL,fetch =  FetchType.EAGER)
+    private Set<Appointment> appointment = new HashSet<>(); //inverse side
+For each patient:
+→ insurance is fetched separately
+Result:
+1 query for patients + N queries for appointment
+-------------------------------------------
+SOLUTION:
+-------------------------------------------
+Use custom query with JOIN FETCH:
+SELECT p FROM Patient p Left JOIN FETCH p.appointments --->(this is jpql) or sql query (Select p from Patient p left join on p.id = appointment.id)
+-------------------------------------------
+9. INDUSTRY BEST PRACTICE
+-------------------------------------------
+✔ Always use LAZY loading
+✔ Fetch data explicitly using queries(i.e custom query)
+✔ Avoid EAGER unless absolutely needed
+
+
+-------------------------------------------
+10. YOUR PROJECT CONTEXT
+-------------------------------------------
+
+Patient → Insurance
+
+Better to write:
+
+@OneToOne(fetch = FetchType.LAZY, cascade = ALL, orphanRemoval = true)
+private Insurance insurance;
+
+-------------------------------------------
+WHY?
+-------------------------------------------
+
+- Insurance is not always needed
+- Saves performance
+
+
 -------------------------------------------
 11. INTERVIEW QUESTIONS
 -------------------------------------------
-Q1. What is orphanRemoval?
-→ Deletes child when removed from parent
-Q2. Difference between cascade remove and orphanRemoval?
-→ Cascade → parent delete
-→ Orphan → relationship removal
-Q3. Does orphanRemoval work without transaction?
-→ No
-Q4. Is orphanRemoval safe?
-→ Yes, only for dependent entities
+
+Q1. What is FetchType?
+→ Defines when related data is loaded
+Q2. Default fetch type of OneToMany?
+→ LAZY
+Q3. What is LazyInitializationException?
+→ Accessing lazy data outside session
+Q4. How to solve N+1 problem?
+→ JOIN FETCH
+Q5. Which fetch type is better?
+→ LAZY (in most cases)
 -------------------------------------------
 12. MEMORY TRICK
 -------------------------------------------
-"Remove reference → Remove row"
-"Orphan = no parent = delete"
+EAGER:
+"Load everything immediately"
+LAZY:
+"Load only when needed"
 -------------------------------------------
 END OF NOTES
 -------------------------------------------

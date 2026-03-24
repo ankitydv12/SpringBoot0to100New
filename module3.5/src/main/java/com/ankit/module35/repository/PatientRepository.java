@@ -33,4 +33,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     @Transactional // make sure that transaction is fully completed or fully fail
     @Query("UPDATE Patient p set p.name = :name where p.id = :id ")
     int updatePatientNameWithId(@Param("name") String name,@Param("id")Long id);
+
+    @Query("select p from Patient p left join fetch p.appointment")
+    public List<Patient> getAllPatients();
 }

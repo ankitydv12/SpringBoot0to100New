@@ -30,7 +30,7 @@ public class Appointment {
     @JsonIgnore
     private Patient patient;
     private String status;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     @JsonIgnore
     private  Doctor doctor_id;
