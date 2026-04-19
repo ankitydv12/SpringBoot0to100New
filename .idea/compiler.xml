@@ -7,17 +7,6 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="module2" />
-      </profile>
-      <profile name="Annotation profile for module3.5" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
-        </processorPath>
-        <module name="module3.5" />
-        <module name="module3" />
       </profile>
       <profile name="Annotation profile for module4" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -30,6 +19,9 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="module2" target="21" />
+      <module name="module3" target="21" />
+      <module name="module3.5" target="21" />
       <module name="prod-ready-features" target="21" />
     </bytecodeTargetLevel>
   </component>
