@@ -31,4 +31,10 @@ public class PostController {
     {
         return postService.getPostById(postId);
     }
+
+    @PatchMapping("/{postId}")
+    PostDTO updatePost(@PathVariable Long postId , @RequestBody PostDTO request)
+    {
+        return postService.updatePost(postId,request);
+    }
 }

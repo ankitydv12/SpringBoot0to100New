@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
+
 
 @Getter
 @Setter
@@ -12,7 +14,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "posts")
-public class PostEntity {
+@Audited
+public class PostEntity extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;

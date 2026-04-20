@@ -1,25 +1,126 @@
-Commit-->4.2 Module4AddedAndSetup
+Commit-->4.3 Auditing
+Auditing In Spring Boot
+    Auditing in Spring Boot is a feature that helps track and manage the changes made to your entities,
+        providing insights into who made changes and when.
+        It can automatically populate fields like:
+    Creation Timestamp: The date and time when an entity was created.
+    Last Modified Timestamp: The date and time when an entity was last updated.
+    Created By: The user who created the entity.
+    Last Modified By: The user who last modified the entity.
+Auditing Steps:
 
+1. Create an auditor provider class.
+   - Implement AuditorAware<T>.
+   - Override getCurrentAuditor().
+   - Return the current user inside Optional.
+   - Example: AuditorAwareImp returns Optional.of("Ankit Yadav").
 
-1 Spring Boot dev Tools
-    Every time make changes in the code we need to restart the program and this is time taking and slow the development
-    Spring Boot introduced the SpringBoot dev tool that automatically restart or recompile the program when any changement are made in the compiled class
-    Add the springboot dev tool dependencies
-        <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-devtools</artifactId>
-        <optional>true</optional>
-        </dependency>
-    Do this setting in the IDE:
-        Setting-->Build,Execution,Deployment --> Compiler : Check the Build Project automatically
-        Setting-->Advanced Settings-->Compiler: Check the Allow auto-make to start even if deve.........
+2. Register the auditor provider as a Spring bean.
+   - Create a @Bean method in config class.
+   - Example: AuditorAwareImp getAuditorAware().
 
-DevTools add these in the application.properties
-    spring.devtools.restart.enabled=false
-        Disable automatic restart. If true, app restarts when compiled code changes.
-    spring.devtools.restart.exclude=static/**,public/**
-        Files inside static and public folders will not trigger restart.
-    spring.devtools.restart.pollInterval=20
-        DevTools checks for file changes after this interval.
-    spring.devtools.restart.quietPeriod=10
-        DevTools waits for this quiet time before restarting, so files can finish updating.
+3. Enable JPA auditing.
+   - Add @EnableJpaAuditing on configuration class.
+   - Pass auditorAwareRef with the auditor bean name.
+   - Example: @EnableJpaAuditing(auditorAwareRef = "getAuditorAware").
+
+4. Create a common auditable parent entity.
+   - Add @MappedSuperclass so fields are inherited by child entities.
+   - Add @EntityListeners(AuditingEntityListener.class) to activate auditing callbacks.
+
+5. Add auditing fields in the parent entity.
+   - @CreatedDate -> createdAt
+   - @CreatedBy -> createdBy
+   - @LastModifiedDate -> lastModificationAt
+   - @LastModifiedBy -> lastModifiedBy
+
+6. Extend the auditable parent class in required entities.
+   - Example: PostEntity extends AuditableEntity.
+   - The posts table will get auditing columns from AuditableEntity.
+
+7. Test by creating and updating records.
+   - On create: createdAt, createdBy, lastModificationAt, and lastModifiedBy are filled.
+   - On update: lastModificationAt and lastModifiedBy are updated.
+
+Internal working of Auditing:   
+    The auditing feature in Spring Boot automates the tracking of entity changes by leveraging lifecycle event listeners and the AuditorAware interface to capture user and timestamp information seamlessly. This approach enhances data integrity and accountability in your application without requiring additional boilerplate code.
+
+    Entity Lifecycle Events:
+
+        When an entity is persisted or updated, the AuditingEntityListener is triggered.
+            This listener handles the following lifecycle events:
+            @PrePersist: This method is called before an entity is saved for the first time. During this phase, the listener populates the fields annotated with @CreatedDate and @CreatedBy.
+            @PreUpdate: This method is invoked before an entity is updated. It sets the fields annotated with @LastModifiedDate and @LastModifiedBy.
+            @PreRemove: This method is called before the entity manager executes the remove() operation on the entity. It is an appropriate place for implementing any necessary cleanup or validation logic.
+        AuditorAware Interface:
+            The AuditorAware interface is crucial for providing the current user’s information during the auditing process.
+            When the auditing listener is triggered, it calls the getCurrentAuditor() method of the AuditorAware implementation you created.
+            This method typically retrieves the current authenticated user's information, often using Spring Security's context to ensure that the correct user is logged in.
+
+Hibernate Envers:
+    Hibernate Envers is used for entity versioning and revision history.
+    Spring Data JPA auditing stores only the current audit information like createdAt, createdBy, lastModificationAt, and lastModifiedBy.
+    Hibernate Envers stores the old versions of an entity whenever insert, update, or delete operations happen.
+
+    Dependency:
+        Add hibernate-envers dependency in pom.xml.
+        Example:
+            org.hibernate:hibernate-envers
+
+    Entity setup:
+        Add @Audited on the entity whose revision history should be tracked.
+        Example:
+            @Audited
+            public class PostEntity extends AuditableEntity
+
+    Tables created by Envers:
+        1. Original entity table:
+           - Example: posts
+           - Stores the latest/current state of the entity.
+
+        2. Audit table:
+           - Example: posts_AUD
+           - Stores historical versions of PostEntity.
+           - Contains entity fields plus revision information.
+
+        3. Revision table:
+           - Example: REVINFO
+           - Stores revision number and revision timestamp.
+
+    Revision:
+        A revision represents one database transaction that changed an audited entity.
+        If a PostEntity is created, updated, or deleted, Envers creates a new revision entry.
+        Each revision can be used later to fetch the entity state at that point in time.
+
+AuditController concept:
+    AuditController reads old revisions of PostEntity using Hibernate Envers.
+
+    Steps used in AuditController:
+        1. Inject EntityManagerFactory.
+           - EntityManagerFactory is used to create an EntityManager.
+
+        2. Create AuditReader.
+           - AuditReader reader = AuditReaderFactory.get(entityManagerFactory.createEntityManager());
+           - AuditReader is the main Envers API used to query audit/history data.
+
+        3. Get all revision numbers for an entity id.
+           - reader.getRevisions(PostEntity.class, postId)
+           - This returns the list of revision numbers where the given PostEntity id changed.
+
+        4. Fetch entity state for each revision.
+           - reader.find(PostEntity.class, postId, revisionNumber)
+           - This returns how the PostEntity looked at that specific revision.
+
+        5. Return revision history.
+           - The controller maps every revision number to the old PostEntity state.
+           - Endpoint: GET /audit/posts/{postId}
+           - Response: List<PostEntity> containing different historical versions of the post.
+
+    Difference between Spring Data JPA Auditing and Hibernate Envers:
+        Spring Data JPA Auditing:
+            - Stores who created/updated the current row and when.
+            - Does not keep previous versions of the entity.
+
+        Hibernate Envers:
+            - Stores full revision history of audited entities.
+            - Allows fetching old versions using AuditReader.
