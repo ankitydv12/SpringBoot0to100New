@@ -1,126 +1,177 @@
-Commit-->4.3 Auditing
-Auditing In Spring Boot
-    Auditing in Spring Boot is a feature that helps track and manage the changes made to your entities,
-        providing insights into who made changes and when.
-        It can automatically populate fields like:
-    Creation Timestamp: The date and time when an entity was created.
-    Last Modified Timestamp: The date and time when an entity was last updated.
-    Created By: The user who created the entity.
-    Last Modified By: The user who last modified the entity.
-Auditing Steps:
+Commit --> 4.4 RESTCLIENT
 
-1. Create an auditor provider class.
-   - Implement AuditorAware<T>.
-   - Override getCurrentAuditor().
-   - Return the current user inside Optional.
-   - Example: AuditorAwareImp returns Optional.of("Ankit Yadav").
+RESTCLIENT
 
-2. Register the auditor provider as a Spring bean.
-   - Create a @Bean method in config class.
-   - Example: AuditorAwareImp getAuditorAware().
+1. What is RestClient?
+RestClient is Spring's synchronous HTTP client used to call another REST API from a Spring Boot application.
+It is mainly used when one service needs to communicate with another service.
 
-3. Enable JPA auditing.
-   - Add @EnableJpaAuditing on configuration class.
-   - Pass auditorAwareRef with the auditor bean name.
-   - Example: @EnableJpaAuditing(auditorAwareRef = "getAuditorAware").
+Examples:
+- Employee service calling another microservice
+- One backend application fetching data from an external API
 
-4. Create a common auditable parent entity.
-   - Add @MappedSuperclass so fields are inherited by child entities.
-   - Add @EntityListeners(AuditingEntityListener.class) to activate auditing callbacks.
+RestClient is a modern alternative to RestTemplate for synchronous communication.
 
-5. Add auditing fields in the parent entity.
-   - @CreatedDate -> createdAt
-   - @CreatedBy -> createdBy
-   - @LastModifiedDate -> lastModificationAt
-   - @LastModifiedBy -> lastModifiedBy
 
-6. Extend the auditable parent class in required entities.
-   - Example: PostEntity extends AuditableEntity.
-   - The posts table will get auditing columns from AuditableEntity.
+2. Why do we use RestClient?
+- To consume external REST APIs
+- To call another microservice from our application
+- To send HTTP requests like GET, POST, PUT, PATCH, DELETE
+- To map JSON response directly into DTO classes
 
-7. Test by creating and updating records.
-   - On create: createdAt, createdBy, lastModificationAt, and lastModifiedBy are filled.
-   - On update: lastModificationAt and lastModifiedBy are updated.
 
-Internal working of Auditing:   
-    The auditing feature in Spring Boot automates the tracking of entity changes by leveraging lifecycle event listeners and the AuditorAware interface to capture user and timestamp information seamlessly. This approach enhances data integrity and accountability in your application without requiring additional boilerplate code.
+3. Basic flow of RestClient implementation
+Step 1: Add base URL in application.properties
+Example:
+employeeService.base.url=http://localhost:8081/
 
-    Entity Lifecycle Events:
+Step 2: Create RestClient configuration class
 
-        When an entity is persisted or updated, the AuditingEntityListener is triggered.
-            This listener handles the following lifecycle events:
-            @PrePersist: This method is called before an entity is saved for the first time. During this phase, the listener populates the fields annotated with @CreatedDate and @CreatedBy.
-            @PreUpdate: This method is invoked before an entity is updated. It sets the fields annotated with @LastModifiedDate and @LastModifiedBy.
-            @PreRemove: This method is called before the entity manager executes the remove() operation on the entity. It is an appropriate place for implementing any necessary cleanup or validation logic.
-        AuditorAware Interface:
-            The AuditorAware interface is crucial for providing the current user’s information during the auditing process.
-            When the auditing listener is triggered, it calls the getCurrentAuditor() method of the AuditorAware implementation you created.
-            This method typically retrieves the current authenticated user's information, often using Spring Security's context to ensure that the correct user is logged in.
+Step 3: Expose RestClient as a Spring Bean
 
-Hibernate Envers:
-    Hibernate Envers is used for entity versioning and revision history.
-    Spring Data JPA auditing stores only the current audit information like createdAt, createdBy, lastModificationAt, and lastModifiedBy.
-    Hibernate Envers stores the old versions of an entity whenever insert, update, or delete operations happen.
+Step 4: Inject RestClient inside a service/client class
 
-    Dependency:
-        Add hibernate-envers dependency in pom.xml.
-        Example:
-            org.hibernate:hibernate-envers
+Step 5: Use get(), post(), put(), patch(), delete() methods to call APIs
 
-    Entity setup:
-        Add @Audited on the entity whose revision history should be tracked.
-        Example:
-            @Audited
-            public class PostEntity extends AuditableEntity
+Step 6: Convert response JSON into DTO / ApiResponse<T>
 
-    Tables created by Envers:
-        1. Original entity table:
-           - Example: posts
-           - Stores the latest/current state of the entity.
 
-        2. Audit table:
-           - Example: posts_AUD
-           - Stores historical versions of PostEntity.
-           - Contains entity fields plus revision information.
+4. RestClientConfig explained
+In this project:
+RestClientConfig creates and configures the RestClient bean.
 
-        3. Revision table:
-           - Example: REVINFO
-           - Stores revision number and revision timestamp.
+Code idea:
+@Configuration
+public class RestClientConfig {
 
-    Revision:
-        A revision represents one database transaction that changed an audited entity.
-        If a PostEntity is created, updated, or deleted, Envers creates a new revision entry.
-        Each revision can be used later to fetch the entity state at that point in time.
+    @Value("${employeeService.base.url}")
+    private String baseUrl;
 
-AuditController concept:
-    AuditController reads old revisions of PostEntity using Hibernate Envers.
+    @Bean
+    @Qualifier("getEmployeeServiceRestClient")
+    RestClient getEmployeeServiceRestClient() {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .build();
+    }
+}
 
-    Steps used in AuditController:
-        1. Inject EntityManagerFactory.
-           - EntityManagerFactory is used to create an EntityManager.
+Explanation:
+- @Configuration
+  Tells Spring that this class contains bean definitions.
 
-        2. Create AuditReader.
-           - AuditReader reader = AuditReaderFactory.get(entityManagerFactory.createEntityManager());
-           - AuditReader is the main Envers API used to query audit/history data.
+- @Value("${employeeService.base.url}")
+  Reads the base URL from properties file.
+  This avoids hardcoding URL inside service logic.
 
-        3. Get all revision numbers for an entity id.
-           - reader.getRevisions(PostEntity.class, postId)
-           - This returns the list of revision numbers where the given PostEntity id changed.
+- @Bean
+  Creates a RestClient object and registers it in Spring container.
 
-        4. Fetch entity state for each revision.
-           - reader.find(PostEntity.class, postId, revisionNumber)
-           - This returns how the PostEntity looked at that specific revision.
+- @Qualifier("getEmployeeServiceRestClient")
+  Gives a name to this bean.
+  Useful when multiple RestClient beans exist.
 
-        5. Return revision history.
-           - The controller maps every revision number to the old PostEntity state.
-           - Endpoint: GET /audit/posts/{postId}
-           - Response: List<PostEntity> containing different historical versions of the post.
+- .baseUrl(baseUrl)
+  Sets the common URL for all requests.
+  After this, we can write .uri("employees") instead of full URL.
 
-    Difference between Spring Data JPA Auditing and Hibernate Envers:
-        Spring Data JPA Auditing:
-            - Stores who created/updated the current row and when.
-            - Does not keep previous versions of the entity.
+- .defaultHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+  Adds default Content-Type as application/json.
+  Helpful for requests sending JSON body.
 
-        Hibernate Envers:
-            - Stores full revision history of audited entities.
-            - Allows fetching old versions using AuditReader.
+
+
+
+5. How RestClient works in this project
+Project structure:
+- RestClientConfig creates the bean
+- EmployeeClientImp uses the bean
+- RestClientController calls EmployeeClientImp
+
+Flow:
+Controller -> Client/Service -> RestClient -> External API
+
+
+6. GET method with RestClient
+GET is used to fetch/read data.
+
+Example for all employees:
+ApiResponse<List<EmployeeDTO>> response = restClient.get()
+        .uri("employees")
+        .retrieve()
+        .body(new ParameterizedTypeReference<>() {});
+
+return response.getData();
+
+Explanation:
+- restClient.get() -> selects HTTP GET method
+- .uri("employees") -> endpoint path
+- .retrieve() -> sends request and gets response
+- .body(...) -> converts JSON response to Java object
+- response.getData() -> extracts actual data from ApiResponse wrapper
+
+Example for one employee by id:
+ApiResponse<EmployeeDTO> response = restClient.get()
+        .uri("employees/{id}", id)
+        .retrieve()
+        .body(new ParameterizedTypeReference<>() {});
+
+return response.getData();
+
+
+7. POST method with RestClient
+POST is used to create new data.
+
+Example:
+ApiResponse<EmployeeDTO> response = restClient.post()
+        .uri("employees")
+        .body(empRequest)
+        .retrieve()
+        .body(new ParameterizedTypeReference<>() {});
+
+return response.getData();
+
+Explanation:
+- post() -> selects HTTP POST method
+- body(empRequest) -> sends EmployeeDTO object as JSON
+- retrieve() -> executes request
+- body(...) -> converts response back into ApiResponse<EmployeeDTO>
+
+restClient
+    .method()
+    .uri(...)
+    .body(...)      // only for POST, PUT, PATCH
+    .retrieve()
+    .body(...);
+
+
+
+12. Why ParameterizedTypeReference is used?
+When response contains generic types like:
+- ApiResponse<EmployeeDTO>
+- ApiResponse<List<EmployeeDTO>>
+
+Java type erasure makes generic type mapping difficult at runtime.
+ParameterizedTypeReference helps Spring understand the exact response type.
+
+Example:
+.body(new ParameterizedTypeReference<ApiResponse<List<EmployeeDTO>>>() {})
+
+
+13. Advantages of RestClient
+- Clean and readable API
+- Easy bean configuration
+- Good for synchronous communication
+- Better modern approach in Spring
+- Easily integrates with DTO mapping
+- Useful for microservice architecture
+
+
+14. Short interview answer
+RestClient is Spring's synchronous HTTP client used to consume REST APIs from a Spring Boot application.
+It is configured using RestClient.builder(), usually in a configuration class. We can set base URL, headers, and create a reusable bean.
+Then we inject that bean into a service class and use methods like get(), post(), put(), patch(), and delete() to call external APIs and map the response into DTOs.
+
+15. One-line summary
+RestClient is used to call external REST APIs from a Spring Boot application in a clean, reusable, and synchronous way.
