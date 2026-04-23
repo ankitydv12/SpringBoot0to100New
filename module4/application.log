@@ -1,0 +1,212 @@
+2026-04-23T01:09:46.548+05:30  INFO 189201 --- [module4] [main] c.ankit.module4.Module4ApplicationTests  : Starting Module4ApplicationTests using Java 25.0.3-ea with PID 189201 (started by ankit in /media/ankit/Learning/SpringBoot0to100NewLocal/module4)
+2026-04-23T01:09:46.549+05:30  INFO 189201 --- [module4] [main] c.ankit.module4.Module4ApplicationTests  : No active profile set, falling back to 1 default profile: "default"
+2026-04-23T01:09:47.009+05:30  INFO 189201 --- [module4] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-23T01:09:47.044+05:30  INFO 189201 --- [module4] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 30 ms. Found 1 JPA repository interface.
+2026-04-23T01:09:47.350+05:30  INFO 189201 --- [module4] [main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-23T01:09:47.387+05:30  INFO 189201 --- [module4] [main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-04-23T01:09:47.601+05:30  INFO 189201 --- [module4] [main] o.h.e.boot.internal.EnversServiceImpl    : Envers integration enabled? : true
+2026-04-23T01:09:47.760+05:30  INFO 189201 --- [module4] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-23T01:09:47.782+05:30  INFO 189201 --- [module4] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-23T01:09:48.025+05:30  INFO 189201 --- [module4] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@700202fa
+2026-04-23T01:09:48.026+05:30  INFO 189201 --- [module4] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-23T01:09:48.069+05:30  INFO 189201 --- [module4] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/ProdReadyFeatures?useSSl=false]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 9.4
+	Default catalog/schema: ProdReadyFeatures/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-23T01:09:48.183+05:30  INFO 189201 --- [module4] [main] o.h.e.c.i.m.AuditMetadataGenerator       : Adding properties for entity: com.ankit.module4.entities.PostEntity
+2026-04-23T01:09:48.704+05:30  INFO 189201 --- [module4] [main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-23T01:09:48.758+05:30  INFO 189201 --- [module4] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-23T01:09:48.911+05:30  INFO 189201 --- [module4] [main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-23T01:09:49.072+05:30  WARN 189201 --- [module4] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-23T01:09:49.371+05:30  INFO 189201 --- [module4] [main] c.ankit.module4.Module4ApplicationTests  : Started Module4ApplicationTests in 3.006 seconds (process running for 3.798)
+2026-04-23T01:09:49.550+05:30 TRACE 189201 --- [module4] [main] c.a.module4.clients.EmployeeClientImp    : Trying to Retrieve all employees Method in getAllEmployees
+2026-04-23T01:09:49.551+05:30  INFO 189201 --- [module4] [main] c.a.module4.clients.EmployeeClientImp    : Attempting to call the restclient method
+2026-04-23T01:09:49.655+05:30 DEBUG 189201 --- [module4] [main] c.a.module4.clients.EmployeeClientImp    : Successfully retrived the all employees 
+2026-04-23T01:09:49.656+05:30 TRACE 189201 --- [module4] [main] c.a.module4.clients.EmployeeClientImp    : List of employees from restclient: [com.ankit.module4.dto.EmployeeDTO@4c666872, com.ankit.module4.dto.EmployeeDTO@7c4a7770, com.ankit.module4.dto.EmployeeDTO@72117a6c, com.ankit.module4.dto.EmployeeDTO@71b75f99, com.ankit.module4.dto.EmployeeDTO@e6d9c25, com.ankit.module4.dto.EmployeeDTO@21339b6f, com.ankit.module4.dto.EmployeeDTO@5808573f, com.ankit.module4.dto.EmployeeDTO@13088030, com.ankit.module4.dto.EmployeeDTO@71e6bac0, com.ankit.module4.dto.EmployeeDTO@4c33bf70, com.ankit.module4.dto.EmployeeDTO@5698a866, com.ankit.module4.dto.EmployeeDTO@1c6ab85, com.ankit.module4.dto.EmployeeDTO@45b221c7, com.ankit.module4.dto.EmployeeDTO@14abde3e, com.ankit.module4.dto.EmployeeDTO@7e38f55, com.ankit.module4.dto.EmployeeDTO@334d96af, com.ankit.module4.dto.EmployeeDTO@67253518, com.ankit.module4.dto.EmployeeDTO@2db55dec, com.ankit.module4.dto.EmployeeDTO@3637e628]
+2026-04-23T01:09:49.668+05:30  INFO 189201 --- [module4] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-23T01:09:49.670+05:30  INFO 189201 --- [module4] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-04-23T01:09:49.675+05:30  INFO 189201 --- [module4] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+23-11-26 10:04:20 [INFO] {green} [com.ankit.module4.Module4ApplicationTests] ---Starting Module4ApplicationTests using Java 25.0.3-ea with PID 21421 (started by ankit in /media/ankit/Learning/SpringBoot0to100NewLocal/module4)
+23-11-26 10:04:20 [INFO] {green} [com.ankit.module4.Module4ApplicationTests] ---No active profile set, falling back to 1 default profile: "default"
+23-11-26 10:04:21 [INFO] {green} [org.springframework.data.repository.config.RepositoryConfigurationDelegate] ---Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+23-11-26 10:04:21 [INFO] {green} [org.springframework.data.repository.config.RepositoryConfigurationDelegate] ---Finished Spring Data repository scanning in 55 ms. Found 1 JPA repository interface.
+23-11-26 10:04:22 [INFO] {green} [org.hibernate.orm.jpa] ---HHH008540: Processing PersistenceUnitInfo [name: default]
+23-11-26 10:04:22 [INFO] {green} [org.hibernate.orm.core] ---HHH000001: Hibernate ORM core version 7.2.7.Final
+23-11-26 10:04:22 [INFO] {green} [org.hibernate.envers.boot.internal.EnversServiceImpl] ---Envers integration enabled? : true
+23-11-26 10:04:23 [INFO] {green} [org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo] ---No LoadTimeWeaver setup: ignoring JPA class transformer
+23-11-26 10:04:23 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Starting...
+23-11-26 10:04:23 [INFO] {green} [com.zaxxer.hikari.pool.HikariPool] ---HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5e72c82a
+23-11-26 10:04:23 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Start completed.
+23-11-26 10:04:23 [INFO] {green} [org.hibernate.orm.connections.pooling] ---HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/ProdReadyFeatures?useSSl=false]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 9.4
+	Default catalog/schema: ProdReadyFeatures/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+23-11-26 10:04:24 [INFO] {green} [org.hibernate.envers.configuration.internal.metadata.AuditMetadataGenerator] ---Adding properties for entity: com.ankit.module4.entities.PostEntity
+23-11-26 10:04:24 [INFO] {green} [org.hibernate.orm.core] ---HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+23-11-26 10:04:24 [INFO] {green} [org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean] ---Initialized JPA EntityManagerFactory for persistence unit 'default'
+23-11-26 10:04:25 [INFO] {green} [org.springframework.data.jpa.repository.query.QueryEnhancerFactories] ---Hibernate is in classpath; If applicable, HQL parser will be used.
+23-11-26 10:04:25 [WARN] {green} [org.springframework.boot.jpa.autoconfigure.JpaBaseConfiguration$JpaWebConfiguration] ---spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+23-11-26 10:04:25 [INFO] {green} [com.ankit.module4.Module4ApplicationTests] ---Started Module4ApplicationTests in 5.736 seconds (process running for 7.395)
+23-11-26 10:04:26 [TRACE] {green} [com.ankit.module4.clients.EmployeeClientImp] ---Trying to Retrieve all employees Method in getAllEmployees
+23-11-26 10:04:26 [INFO] {green} [com.ankit.module4.clients.EmployeeClientImp] ---Attempting to call the restclient method
+23-11-26 10:04:26 [ERROR] {green} [com.ankit.module4.clients.EmployeeClientImp] ---Exception Occure in getAllEmployee
+org.springframework.web.client.ResourceAccessException: I/O error on GET request for "http://localhost:8080/employees": null
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.createResourceAccessException(DefaultRestClient.java:776)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchangeInternal(DefaultRestClient.java:624)
+	at org.springframework.web.client.DefaultRestClient$DefaultRequestBodyUriSpec.exchange(DefaultRestClient.java:572)
+	at org.springframework.web.client.RestClient$RequestHeadersSpec.exchange(RestClient.java:747)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.executeAndExtract(DefaultRestClient.java:921)
+	at org.springframework.web.client.DefaultRestClient$DefaultResponseSpec.body(DefaultRestClient.java:844)
+	at com.ankit.module4.clients.EmployeeClientImp.getAllEmployees(EmployeeClientImp.java:36)
+	at com.ankit.module4.Module4ApplicationTests.getEmp(Module4ApplicationTests.java:16)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:701)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:502)
+	at org.junit.jupiter.engine.support.MethodReflectionUtils.invoke(MethodReflectionUtils.java:45)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:61)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:124)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:163)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:148)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:123)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:105)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:99)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:66)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:47)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:39)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:104)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:98)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invokeVoid(InterceptingExecutableInvoker.java:71)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$0(TestMethodTestDescriptor.java:219)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:215)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:157)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:70)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:176)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58)
+	at org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:81)
+	at com.intellij.junit6.JUnit6TestRunnerHelper.execute(JUnit6TestRunnerHelper.java:69)
+	at com.intellij.junit5.JUnit5IdeaTestRunner.startRunnerWithArgs(JUnit5IdeaTestRunner.java:70)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
+	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
+	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:244)
+	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:65)
+Caused by: java.net.ConnectException
+	at java.net.http/jdk.internal.net.http.common.Utils.toConnectException(Utils.java:1070)
+	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:223)
+	at java.net.http/jdk.internal.net.http.PlainHttpConnection.checkRetryConnect(PlainHttpConnection.java:277)
+	at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$0(PlainHttpConnection.java:235)
+	at java.base/java.util.concurrent.CompletableFuture.uniHandle(CompletableFuture.java:955)
+	at java.base/java.util.concurrent.CompletableFuture$UniHandle.tryFire$$$capture(CompletableFuture.java:932)
+	at java.base/java.util.concurrent.CompletableFuture$UniHandle.tryFire(CompletableFuture.java)
+	at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:531)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run$$$capture(CompletableFuture.java:1794)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: java.nio.channels.ClosedChannelException
+	at java.base/sun.nio.ch.SocketChannelImpl.ensureOpen(SocketChannelImpl.java:204)
+	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:942)
+	at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:211)
+	... 11 common frames omitted
+23-11-26 10:04:26 [INFO] {green} [org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean] ---Closing JPA EntityManagerFactory for persistence unit 'default'
+23-11-26 10:04:26 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Shutdown initiated...
+23-11-26 10:04:26 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Shutdown completed.
+23-12-26 10:04:31 [INFO] {green} [com.ankit.module4.Module4ApplicationTests] ---Starting Module4ApplicationTests using Java 25.0.3-ea with PID 23846 (started by ankit in /media/ankit/Learning/SpringBoot0to100NewLocal/module4)
+23-12-26 10:04:31 [INFO] {green} [com.ankit.module4.Module4ApplicationTests] ---No active profile set, falling back to 1 default profile: "default"
+23-12-26 10:04:32 [INFO] {green} [org.springframework.data.repository.config.RepositoryConfigurationDelegate] ---Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+23-12-26 10:04:32 [INFO] {green} [org.springframework.data.repository.config.RepositoryConfigurationDelegate] ---Finished Spring Data repository scanning in 52 ms. Found 1 JPA repository interface.
+23-12-26 10:04:32 [INFO] {green} [org.hibernate.orm.jpa] ---HHH008540: Processing PersistenceUnitInfo [name: default]
+23-12-26 10:04:32 [INFO] {green} [org.hibernate.orm.core] ---HHH000001: Hibernate ORM core version 7.2.7.Final
+23-12-26 10:04:33 [INFO] {green} [org.hibernate.envers.boot.internal.EnversServiceImpl] ---Envers integration enabled? : true
+23-12-26 10:04:33 [INFO] {green} [org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo] ---No LoadTimeWeaver setup: ignoring JPA class transformer
+23-12-26 10:04:33 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Starting...
+23-12-26 10:04:33 [INFO] {green} [com.zaxxer.hikari.pool.HikariPool] ---HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1ea19c97
+23-12-26 10:04:33 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Start completed.
+23-12-26 10:04:34 [INFO] {green} [org.hibernate.orm.connections.pooling] ---HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/ProdReadyFeatures?useSSl=false]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 9.4
+	Default catalog/schema: ProdReadyFeatures/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+23-12-26 10:04:34 [INFO] {green} [org.hibernate.envers.configuration.internal.metadata.AuditMetadataGenerator] ---Adding properties for entity: com.ankit.module4.entities.PostEntity
+23-12-26 10:04:35 [INFO] {green} [org.hibernate.orm.core] ---HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+23-12-26 10:04:35 [INFO] {green} [org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean] ---Initialized JPA EntityManagerFactory for persistence unit 'default'
+23-12-26 10:04:35 [INFO] {green} [org.springframework.data.jpa.repository.query.QueryEnhancerFactories] ---Hibernate is in classpath; If applicable, HQL parser will be used.
+23-12-26 10:04:35 [WARN] {green} [org.springframework.boot.jpa.autoconfigure.JpaBaseConfiguration$JpaWebConfiguration] ---spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+23-12-26 10:04:36 [INFO] {green} [com.ankit.module4.Module4ApplicationTests] ---Started Module4ApplicationTests in 5.426 seconds (process running for 6.994)
+23-12-26 10:04:36 [TRACE] {green} [com.ankit.module4.clients.EmployeeClientImp] ---Trying to Retrieve all employees Method in getAllEmployees
+23-12-26 10:04:36 [INFO] {green} [com.ankit.module4.clients.EmployeeClientImp] ---Attempting to call the restclient method
+23-12-26 10:04:37 [DEBUG] {green} [com.ankit.module4.clients.EmployeeClientImp] ---Successfully retrived the all employees 
+23-12-26 10:04:37 [TRACE] {green} [com.ankit.module4.clients.EmployeeClientImp] ---List of employees from restclient: [com.ankit.module4.dto.EmployeeDTO@27f7db5a, com.ankit.module4.dto.EmployeeDTO@6245303e, com.ankit.module4.dto.EmployeeDTO@5a1e28ee, com.ankit.module4.dto.EmployeeDTO@2b208574, com.ankit.module4.dto.EmployeeDTO@3294b641, com.ankit.module4.dto.EmployeeDTO@799bb4ed, com.ankit.module4.dto.EmployeeDTO@5269aa68, com.ankit.module4.dto.EmployeeDTO@7dcd8e74, com.ankit.module4.dto.EmployeeDTO@6a7c0932, com.ankit.module4.dto.EmployeeDTO@4e64e44c, com.ankit.module4.dto.EmployeeDTO@51413d02, com.ankit.module4.dto.EmployeeDTO@406ea770, com.ankit.module4.dto.EmployeeDTO@4ad113d6, com.ankit.module4.dto.EmployeeDTO@23fed844, com.ankit.module4.dto.EmployeeDTO@7b0f5814, com.ankit.module4.dto.EmployeeDTO@4eef2522, com.ankit.module4.dto.EmployeeDTO@c62d08a, com.ankit.module4.dto.EmployeeDTO@598b15ba, com.ankit.module4.dto.EmployeeDTO@58453967]
+23-12-26 10:04:37 [INFO] {green} [org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean] ---Closing JPA EntityManagerFactory for persistence unit 'default'
+23-12-26 10:04:37 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Shutdown initiated...
+23-12-26 10:04:37 [INFO] {green} [com.zaxxer.hikari.HikariDataSource] ---HikariPool-1 - Shutdown completed.

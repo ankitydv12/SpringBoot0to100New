@@ -1,0 +1,38 @@
+2026-04-23T01:03:14.578+05:30  INFO 151538 --- [module4] [restartedMain] com.ankit.module4.Module4Application     : Starting Module4Application using Java 25.0.3-ea with PID 151538 (/media/ankit/Learning/SpringBoot0to100NewLocal/module4/target/classes started by ankit in /media/ankit/Learning/SpringBoot0to100NewLocal)
+2026-04-23T01:03:14.578+05:30  INFO 151538 --- [module4] [restartedMain] com.ankit.module4.Module4Application     : No active profile set, falling back to 1 default profile: "default"
+2026-04-23T01:03:14.649+05:30  INFO 151538 --- [module4] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-23T01:03:14.655+05:30  INFO 151538 --- [module4] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 4 ms. Found 1 JPA repository interface.
+2026-04-23T01:03:14.701+05:30  INFO 151538 --- [module4] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-04-23T01:03:14.703+05:30  INFO 151538 --- [module4] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-23T01:03:14.704+05:30  INFO 151538 --- [module4] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-04-23T01:03:14.710+05:30  INFO 151538 --- [module4] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 131 ms
+2026-04-23T01:03:14.744+05:30  INFO 151538 --- [module4] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-23T01:03:14.755+05:30  INFO 151538 --- [module4] [restartedMain] o.h.e.boot.internal.EnversServiceImpl    : Envers integration enabled? : true
+2026-04-23T01:03:14.759+05:30  INFO 151538 --- [module4] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-23T01:03:14.759+05:30  INFO 151538 --- [module4] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Starting...
+2026-04-23T01:03:14.770+05:30  INFO 151538 --- [module4] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-12 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7acf5287
+2026-04-23T01:03:14.770+05:30  INFO 151538 --- [module4] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Start completed.
+2026-04-23T01:03:14.771+05:30  INFO 151538 --- [module4] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/ProdReadyFeatures?useSSl=false]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 9.4
+	Default catalog/schema: ProdReadyFeatures/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-23T01:03:14.776+05:30  INFO 151538 --- [module4] [restartedMain] o.h.e.c.i.m.AuditMetadataGenerator       : Adding properties for entity: com.ankit.module4.entities.PostEntity
+2026-04-23T01:03:14.794+05:30  INFO 151538 --- [module4] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-23T01:03:14.803+05:30  INFO 151538 --- [module4] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-23T01:03:14.844+05:30  WARN 151538 --- [module4] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-23T01:03:14.902+05:30  INFO 151538 --- [module4] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-04-23T01:03:14.904+05:30  INFO 151538 --- [module4] [restartedMain] com.ankit.module4.Module4Application     : Started Module4Application in 0.352 seconds (process running for 4101.948)
+2026-04-23T01:03:14.905+05:30  INFO 151538 --- [module4] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-04-23T01:19:43.538+05:30  INFO 151538 --- [module4] [SpringApplicationShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-04-23T01:19:43.540+05:30  INFO 151538 --- [module4] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-04-23T01:19:43.542+05:30  INFO 151538 --- [module4] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-23T01:19:43.544+05:30  INFO 151538 --- [module4] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Shutdown initiated...
+2026-04-23T01:19:43.545+05:30  INFO 151538 --- [module4] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Shutdown completed.
