@@ -1,140 +1,62 @@
-Commit --> 4.5 Logging
+Commit --> 4.6 Actuator Endpoint
 
-Logging is the process of recording events, errors, and informational
-messages from an application. It helps developers and system
-administrators track the application's behavior and troubleshoot issues.
-
-Types of Logs:
-Common types are error logs, access logs, and application logs.
-
-Log Levels:
-Logs can be categorized by severity, such as DEBUG, INFO, WARN, ERROR,
-and FATAL.
-
-SLF4J:
-SLF4J (Simple Logging Facade for Java) is a simple and flexible logging
-framework that serves as a facade or abstraction for various logging
-frameworks such as Log4j, Logback, and java.util.logging.
-
-Elements of Logging Framework:
-Every logging framework comes with three elements:
-1. Logger - captures the messages.
-2. Formatter - formats the messages captured by the logger.
-3. Handler - dispatches the messages by printing them on the console,
-storing them in a file, sending an email, etc.
-
-Spring Boot Log Levels:
-The messages logged can be of various severity levels.
-Spring Boot supports:
-* FATAL - Fatal error crashing the system.
-* ERROR - Runtime errors.
-* WARN - Warnings.
-* INFO - Events occurring at runtime (Enabled by default).
-* DEBUG - Information about the flow of the system.
-* TRACE - More detailed information about the flow of the system.
-
-Configuration:
-* Default Behavior: INFO, WARN, and ERROR logs are enabled by default.
-To enable TRACE and DEBUG, configure levels explicitly.
-* Hierarchy: When you enable a level, it logs that level and all levels
-above it. For example, enabling WARN shows WARN through FATAL, but not
-INFO through TRACE.
-* Root Logger: Setting logging.level.root=INFO in application.properties
-configures the root logger to print logs at INFO level and higher.
-
-Key Concepts:
-* TRACE: The most detailed level; includes all levels.
-* DEBUG: Less detailed than TRACE. Includes DEBUG, INFO, WARN, and ERROR.
-
-Handling Errors in RestClient:
-When using RestClient, errors can be handled globally or locally using
-the .onStatus() method.
-
-1. Local Error Handling: In the implementation, .onStatus() is called
-after .retrieve() to catch status codes like is4xxClientError.
-2. Global Error Handling: In the configuration, defaultStatusHandler can
-be applied to RestClient.Builder to handle errors for every request.
-3. Response Body Access: Inside the handler, res.getBody().readAllBytes()
-can be used to capture the error response body for logging.
+Actuator Endpoint:
+    Actuator endpoints let you monitor and interact with your application.
+    Spring Boot includes a number of built-in endpoints and lets you add your own
+    For example, the health endpoint provides basic application health information.
 
 
-Log Formatters
-    The log messages can be formatted and customized according to our
-    requirements by setting colors , message format , etc.
-    logging.pattern.console= %d [%level] %c{1.} [%t] %m%n
-%d — date
-% level — log level
-%c — class path
-%t — thread executing
-%m — message
-%n — new line
+Steps:
+    1.Add Dependencies:
+        <dependency>
+        			<groupId>org.springframework.boot</groupId>
+        			<artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    2. http://localhost:8081/actuator
 
-Log Handlers
-    To set the file name:
-    logging.file.name = error.log
-    To set the pattern for the log file
-    logging.pattern.file = %clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){green}
-    [%level] %c{1.} [%t] %m%n
+* You can access the each actuator endpoint and expose them(Make them remotely accessible) over
+HTTP or JMX
+* By default, only the health endpoint is exposed over HTTP and JMX. Since Endpoints may contain sensitive information,
+you should carefully consider when to expose them.
 
-Logback Configuration XML Setup
-    This is a one-time setup. To configure Logback, navigate to the resources directory,
-    create a new file named logback.xml, and add the code below.
-    <configuration>
-        <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %-5level %c{2.} - %msg%n" />
+* An endpoint is considered to be available when access to it is permitted and it is exposed.
 
-        <property name="LOG_PATH" value="logs" />
+* To Expose Endpoint add this in application.properties:
+    management.endpoint.web.exposure.include=*
+    this will expose the various endpoints
 
-        <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>${LOG_PATH}/application.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-                <maxHistory>30</maxHistory>
-                <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                    <maxFileSize>10MB</maxFileSize>
-                </timeBasedFileNamingAndTriggeringPolicy>
-            </rollingPolicy>
-
-            <encoder>
-                <pattern>${LOG_PATTERN}</pattern>
-            </encoder>
-        </appender>
-
-        <root level="debug">
-            <appender-ref ref="ROLLING_FILE" />
-        </root>
-    </configuration>
-Explanation
-This Logback configuration sets up a rolling file logger that:
-Writes logs to files in a logs directory.
-Uses a specific log message format.
-Rolls over log files daily, creating new files when they exceed 10MB, and keeps logs for 30 days.
-Captures log messages at the DEBUG level and higher.
-
-Appender
-
-This defines an appender named ROLLING_FILE which is responsible for writing log messages to a file. The RollingFileAppender allows log files to roll over based on time or size.
-
-Rolling Policy
-
-TimeBasedRollingPolicy: This rolling policy allows log files to be rolled over based on time.
-
-fileNamePattern: Specifies the pattern for naming the log files. It will create files like application.2024-09-24.0.log, application.2024-09-24.1.log, etc., in the logs directory.
-maxHistory: Sets the maximum number of days to keep log files. Here, it retains logs for 30 days.
-SizeAndTimeBasedFNATP: This triggers file rollover based on both size and time.
-maxFileSize: Specifies the maximum size for each log file. In this case, each log file will be capped at 10MB.
-Encoder
-
-The encoder defines how log messages are formatted before being written to the log file. Here, it uses the previously defined LOG_PATTERN.
-
-Root Logger
-
-root: This defines the root logger for the application.
-level: Sets the logging level for the root logger. In this case, it is set to DEBUG, meaning all logs at this level and higher (INFO, WARN, ERROR, FATAL) will be captured.
-appender-ref: This references the appender defined earlier (ROLLING_FILE), so all log messages at the root level will be sent to the rolling file appender.
-To use this file, we need to tell Spring Boot to reference it. We can do this by configuring it in our application.properties file like this:
-
-logging.config=classpath:logback.xml
-
-After running the application, a new log file is typically created in the logs directory, depending on how your logback.xml is configured.
+| ID               | Description                                                                                                            |
+|------------------|------------------------------------------------------------------------------------------------------------------------|
+| auditevents      | Exposes audit events information for the current application. Requires an AuditEventRepository bean.                   |
+|* beans            | Displays a complete list of all the Spring beans in your application.                                                  |
+| caches           | Exposes available caches.                                                                                              |
+|* conditions       | Shows the conditions that were evaluated on configuration and auto-configuration classes and reasons.                  |
+| configprops      | Displays a collated list of all @ConfigurationProperties. Subject to sanitization.                                     |
+|* env              | Exposes properties from Spring’s ConfigurableEnvironment. Subject to sanitization.                                     |
+| flyway           | Shows any Flyway database migrations that have been applied. Requires one or more Flyway beans.                        |
+| health           | Shows application health information.                                                                                  |
+| httpexchanges    | Displays HTTP exchange information (last 100 exchanges). Requires an HttpExchangeRepository bean.                      |
+| info             | Displays arbitrary application info.                                                                                   |
+| integrationgraph | Shows the Spring Integration graph. Requires a dependency on spring-integration-core.                                  |
+|* loggers          | Shows and modifies the configuration of loggers in the application.                                                    |
+| liquibase        | Shows any Liquibase database migrations that have been applied. Requires one or more Liquibase beans.                  |
+|* metrics          | Shows “metrics” information for the current application to diagnose recorded metrics.                                   |
+| mappings         | Displays a collated list of all @RequestMapping paths.                                                                 |
+| quartz           | Shows information about Quartz Scheduler jobs. Subject to sanitization.                                                |
+| scheduledtasks   | Displays the scheduled tasks in your application.                                                                      |
+| sessions         | Allows retrieval and deletion of user sessions from a Spring Session-backed store.                                     |
+| shutdown         | Lets the application be gracefully shutdown. Only works when using jar packaging. Disabled by default.                 |
+| startup          | Shows startup steps data collected by ApplicationStartup. Requires BufferingApplicationStartup.                        |
+| threaddump       | Performs a thread dump.                                                                                                |
+    * management.endpoint.env.show-values=always
+        Use to control the  visibility of the environment property in the /actuator/env
+* info --> This Endpoints give the information about the app like java , git , os and build
+            We have to add this end info
+                management.info.build.enabled=true
+                management.info.git.enabled=true
+                management.info.os.enabled=true
+                management.info.java.enabled=true
+  Coustom Info: info.app.version = 1.234
+                info.app.name = "Ankit yadav"
 
     
