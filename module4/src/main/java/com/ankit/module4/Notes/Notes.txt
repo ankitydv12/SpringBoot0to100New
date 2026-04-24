@@ -1,62 +1,35 @@
-Commit --> 4.6 Actuator Endpoint
+Commit --> 4.7 OpenAPI and Swagger
+Content: OpenAPI and Swagger
+         Removal of the logback.xml
+springdoc-openapi java library helps to automate the generation of API documentation using spring boot projects.
+springdoc-openapi works by examining an application at runtime to infer API semantics based on spring configurations, class structure and various annotations.
 
-Actuator Endpoint:
-    Actuator endpoints let you monitor and interact with your application.
-    Spring Boot includes a number of built-in endpoints and lets you add your own
-    For example, the health endpoint provides basic application health information.
+   <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.8.17</version>
+   </dependency>
 
+The Swagger UI page will then be available at http://server:port/context-path/swagger-ui.html
+the OpenAPI description will be available at the following url for json format: http://server:port/context-path/v3/api-docs
 
-Steps:
-    1.Add Dependencies:
-        <dependency>
-        			<groupId>org.springframework.boot</groupId>
-        			<artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-    2. http://localhost:8081/actuator
+Very Important:
+When using a Global Response Handler (ResponseBodyAdvice), you must restrict its scope using @RestControllerAdvice(basePackages = "com.ankit.module4").
+    Problem: Without a defined scope, the handler intercepts internal endpoints like Swagger and Actuator.
+    Swagger/Actuator endpoints return raw byte arrays (byte[]). If the Global Handler wraps these bytes into a custom ApiResponse object,
+    the internal 'ByteArrayHttpMessageConverter' fails to cast the ApiResponse back to byte[], causing a ClassCastException.
+    Solution: Restricting the package ensures the handler only processes your application's controllers.
 
-* You can access the each actuator endpoint and expose them(Make them remotely accessible) over
-HTTP or JMX
-* By default, only the health endpoint is exposed over HTTP and JMX. Since Endpoints may contain sensitive information,
-you should carefully consider when to expose them.
+ Fix - Scope your Advice (Recommended)
+   @RestControllerAdvice(basePackages = "com.ankit.module4")
+✅       Why it works:  This is the cleanest fix. It tells Spring: only intercept controllers inside MY package.
+        Swagger and Actuator live in different packages, so they are automatically excluded.
 
-* An endpoint is considered to be available when access to it is permitted and it is exposed.
+Some Properties :
+springdoc.api-docs.path= /apidoc  # Changes the default JSON documentation path from /v3/api-docs to /apidoc
 
-* To Expose Endpoint add this in application.properties:
-    management.endpoint.web.exposure.include=*
-    this will expose the various endpoints
+springdoc.show-actuator=true     # Includes Spring Boot Actuator endpoints (like /health, /info) in the Swagger UI documentation
 
-| ID               | Description                                                                                                            |
-|------------------|------------------------------------------------------------------------------------------------------------------------|
-| auditevents      | Exposes audit events information for the current application. Requires an AuditEventRepository bean.                   |
-|* beans            | Displays a complete list of all the Spring beans in your application.                                                  |
-| caches           | Exposes available caches.                                                                                              |
-|* conditions       | Shows the conditions that were evaluated on configuration and auto-configuration classes and reasons.                  |
-| configprops      | Displays a collated list of all @ConfigurationProperties. Subject to sanitization.                                     |
-|* env              | Exposes properties from Spring’s ConfigurableEnvironment. Subject to sanitization.                                     |
-| flyway           | Shows any Flyway database migrations that have been applied. Requires one or more Flyway beans.                        |
-| health           | Shows application health information.                                                                                  |
-| httpexchanges    | Displays HTTP exchange information (last 100 exchanges). Requires an HttpExchangeRepository bean.                      |
-| info             | Displays arbitrary application info.                                                                                   |
-| integrationgraph | Shows the Spring Integration graph. Requires a dependency on spring-integration-core.                                  |
-|* loggers          | Shows and modifies the configuration of loggers in the application.                                                    |
-| liquibase        | Shows any Liquibase database migrations that have been applied. Requires one or more Liquibase beans.                  |
-|* metrics          | Shows “metrics” information for the current application to diagnose recorded metrics.                                   |
-| mappings         | Displays a collated list of all @RequestMapping paths.                                                                 |
-| quartz           | Shows information about Quartz Scheduler jobs. Subject to sanitization.                                                |
-| scheduledtasks   | Displays the scheduled tasks in your application.                                                                      |
-| sessions         | Allows retrieval and deletion of user sessions from a Spring Session-backed store.                                     |
-| shutdown         | Lets the application be gracefully shutdown. Only works when using jar packaging. Disabled by default.                 |
-| startup          | Shows startup steps data collected by ApplicationStartup. Requires BufferingApplicationStartup.                        |
-| threaddump       | Performs a thread dump.                                                                                                |
-    * management.endpoint.env.show-values=always
-        Use to control the  visibility of the environment property in the /actuator/env
-* info --> This Endpoints give the information about the app like java , git , os and build
-            We have to add this end info
-                management.info.build.enabled=true
-                management.info.git.enabled=true
-                management.info.os.enabled=true
-                management.info.java.enabled=true
-  Coustom Info: info.app.version = 1.234
-                info.app.name = "Ankit yadav"
+springdoc.swagger-ui.path= /swagger  # Changes the default Swagger UI HTML access path from /swagger-ui.html to /swagger
 
-    
+springdoc.swagger-ui.try-it-out-enabled=true  # Automatically expands the "Try it out" section for all API operations by default
