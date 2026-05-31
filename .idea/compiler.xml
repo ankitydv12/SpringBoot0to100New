@@ -8,20 +8,21 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
       </profile>
-      <profile name="Annotation profile for module4" enabled="true">
+      <profile name="Annotation profile for module5SpringSecurity" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="module4" />
+        <module name="module5SpringSecurity" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="module2" target="21" />
       <module name="module3" target="21" />
       <module name="module3.5" target="21" />
+      <module name="module4" target="21" />
       <module name="prod-ready-features" target="21" />
     </bytecodeTargetLevel>
   </component>
@@ -31,6 +32,7 @@
       <module name="module3" options="-parameters" />
       <module name="module3.5" options="-parameters" />
       <module name="module4" options="-parameters" />
+      <module name="module5SpringSecurity" options="-parameters" />
       <module name="prod-ready-features" options="-parameters" />
     </option>
   </component>
