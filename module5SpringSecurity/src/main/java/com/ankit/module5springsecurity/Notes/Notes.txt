@@ -1,281 +1,40 @@
-Commit 5.1 5.2 5.3 SpringSecurity
+Commit 5.4.1 Customized SecurityFilterChain (WebSecurityConfig)
+             ,Default Behaviour , Adding Authentication ,
+             Global AuthenticationManager configured with UserDetailsService
 
 # Spring Security Notes
 
-Spring Security is a powerful and highly customizable authentication and
-access-control framework. It is the de-facto standard for securing Spring-based
-applications.
+## Customizing SecurityFilterChain (WebSecurityConfig)
+In Spring Security, the `SecurityFilterChain` is the core of web security configuration.
+We can customize it by defining a `@Bean` of type `SecurityFilterChain` in a configuration class.
+
+Key components from the configuration:
+- `@Configuration` & `@EnableWebSecurity`: These annotations mark the class as a security configuration class and enable Spring Security's web security support.
+- `SecurityFilterChain` Bean: By defining this bean, we can override the default Spring Boot auto-configuration for security and provide our own custom rules.
+- `HttpSecurity`: The `HttpSecurity` builder is used to configure web based security for specific http requests.
+- `httpSecurity.formLogin(Customizer.withDefaults())`: This specific line enables the default form-based authentication (the default Spring Security login page).
+- `httpSecurity.build()`: Finally, we call `.build()` to create and return the customized `SecurityFilterChain` instance.
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception
+    {
+        httpSecurity.formLogin(Customizer.withDefaults());
+        return  httpSecurity.build();
+    }
+    In this code the foam login is default and their is no authentication any request can be made without authentication
+    by default it contain the CSRF token
+
+
+
+Adding Authentication
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception
+    {
+        httpSecurity
+                .authorizeHttpRequests(auth ->
+                        auth.anyRequest().authenticated())
+                .formLogin(Customizer.withDefaults());
+        return  httpSecurity.build();
+    }
+    One this to be noted if i enter the application.properties credentials in login page it show
+    Error because the The Global AuthenticationManager configured with UserDetailsService bean with name userServiceImpl and userServiceImpl do not provide credentials
 
-It provides comprehensive security services for Java EE-based enterprise
-applications, focusing on:
-
-- Authentication: Verifying who the user is.
-- Authorization: Verifying what the user is allowed to do.
-- Protection against common attacks such as CSRF, session fixation, and
-  clickjacking.
-
-## CSRF (Cross-Site Request Forgery)
-
-CSRF is an attack that forces an authenticated end user to execute unwanted
-actions on a web application.
-
-An attacker may use social engineering, such as sending a link through email or
-chat, to trick a user into performing actions such as:
-
-- Transferring funds.
-- Changing email addresses.
-- Making purchases.
-
-Spring Security provides built-in CSRF protection by requiring a secure, random
-CSRF token to be included in state-changing requests, such as:
-
-- POST
-- PUT
-- DELETE
-
-## XSS (Cross-Site Scripting)
-
-XSS is a vulnerability that occurs when an application includes untrusted data in
-a web page without proper validation or escaping.
-
-This allows an attacker to execute malicious scripts in the victim's browser.
-The script may access cookies, session tokens, or other sensitive browser data
-used by that site.
-
-Common types of XSS include:
-
-- Reflected XSS
-- Stored XSS
-- DOM-based XSS
-
-Common mitigation techniques include:
-
-- Input validation.
-- Output encoding or escaping.
-- Escaping HTML content before rendering it in the browser.
-
-## SQL Injection
-
-SQL Injection is a code injection technique where malicious SQL statements are
-inserted into application inputs, such as login forms or URL parameters.
-
-This vulnerability may allow attackers to:
-
-- Spoof identity.
-- Tamper with existing data.
-- Void transactions.
-- Disclose all data from the system.
-- Destroy data or make it unavailable.
-
-Common prevention techniques include:
-
-- Prepared statements, also known as parameterized queries.
-- Stored procedures.
-- Input validation and sanitization.
-
-In Spring applications, Spring Data JPA or Hibernate with parameterized queries
-generally protects against SQL injection automatically.
-
-## Internal Working of Spring Security (Basic)
-
-When an HTTP request arrives, Spring Security processes it through several layers to grant or deny access [10, 20]:
-
-- **Security Filter Chain:** Intercepts incoming requests before they reach the controller. Filters like `UsernamePasswordAuthenticationFilter` extract credentials and create an unauthenticated token [10, 20].
-- **AuthenticationManager:** The core coordinator that receives the unauthenticated token from the filter and delegates validation to the appropriate `AuthenticationProvider` [10, 20].
-- **AuthenticationProvider:** Contains the actual authentication logic. It validates the user's credentials [20, 21].
-- **UserDetailsService:** Used by the `AuthenticationProvider` to load user-specific data (username, password, authorities) from a data source (e.g., database) [21].
-- **PasswordEncoder:** Securely hashes and verifies that the provided password matches the stored, encoded password [10].
-- **SecurityContext:** If authentication is successful, a fully authenticated token is returned and stored in the `SecurityContext` [10, 20]. This makes the user's details available for the rest of the request lifecycle [10, 20].
-
-## Internal Working of Spring Security (Advanced)
-
-In a Spring Boot application, Spring Security works mainly through a chain of
-filters and authentication components. A request is not sent directly to the
-controller. It first passes through Spring Security, where authentication and
-authorization checks are performed.
-
-### Request Entry Point
-
-Spring Boot automatically registers a filter named `springSecurityFilterChain`
-through `SecurityFilterAutoConfiguration`.
-
-This registered filter is a `DelegatingFilterProxy`. Its job is to receive the
-incoming HTTP request and delegate the actual security processing to Spring
-Security's internal filter infrastructure.
-
-The request flow starts like this:
-
-1. An HTTP request comes into the application.
-2. `DelegatingFilterProxy` intercepts the request.
-3. The request is delegated to `FilterChainProxy`.
-4. `FilterChainProxy` uses `SecurityFilterChain`.
-5. The request passes through multiple security filters.
-6. If the request is valid and authorized, it moves forward to the Dispatcher
-   Servlet and then to the controller.
-
-### SecurityFilterChain
-
-`SecurityFilterChain` contains the list of security filters that are applied to
-the current request.
-
-Examples of filters mentioned in the article include:
-
-- `WebAsyncManagerIntegrationFilter`
-- `SecurityContextPersistenceFilter`
-- `HeaderWriterFilter`
-- `LogoutFilter`
-- `UsernamePasswordAuthenticationFilter`
-
-These filters handle different security responsibilities such as maintaining the
-security context, writing security headers, handling logout, and processing
-username-password authentication.
-
-### AuthenticationManager
-
-When authentication is required, the request is passed to the
-`AuthenticationManager`.
-
-`AuthenticationManager` is the central component responsible for authentication.
-It has an `authenticate()` method that accepts an `Authentication` object.
-
-The `Authentication` object contains the login information submitted by the user,
-such as email or username and password.
-
-The `AuthenticationManager` does not usually perform all authentication logic by
-itself. It delegates the work to a `ProviderManager`.
-
-### ProviderManager
-
-`ProviderManager` is an implementation of `AuthenticationManager`.
-
-It contains a list of `AuthenticationProvider`s. It checks each provider one by
-one until authentication succeeds or all providers have been tried.
-
-This allows Spring Security to support different authentication mechanisms, such
-as database authentication, in-memory authentication, OAuth2 authentication, and
-others.
-
-### AuthenticationProvider
-
-`AuthenticationProvider` is an interface that contains the actual authentication
-logic.
-
-Each provider implements two important methods:
-
-- `authenticate()`: Performs the authentication.
-- `supports()`: Checks whether the provider supports the given authentication
-  type.
-
-One commonly used implementation is `DaoAuthenticationProvider`.
-
-### DaoAuthenticationProvider
-
-`DaoAuthenticationProvider` is commonly used when users are stored in a database.
-
-Its authentication flow is:
-
-1. It receives the authentication request.
-2. It uses `UserDetailsService` to load the user details.
-3. `UserDetailsService` fetches the user from a data source such as a database.
-4. The user data is returned as a `UserDetails` object.
-5. The submitted password is compared with the stored encoded password.
-6. `PasswordEncoder` performs the password matching.
-7. If the password matches, authentication succeeds.
-8. If the password does not match, an authentication exception is thrown.
-
-### UserDetailsService
-
-`UserDetailsService` is used to load user-specific data during authentication.
-
-It contains one main method:
-
-```java
-loadUserByUsername(String username)
-```
-
-In a database-based application, this method usually calls a repository method,
-such as `findByEmail(username)`, to fetch the user.
-
-If the user is found, it returns user details. If the user is not found, an
-exception can be thrown.
-
-### InMemoryUserDetailsManager
-
-`InMemoryUserDetailsManager` is an implementation of `UserDetailsService` that
-stores users in memory.
-
-It is useful for testing or small applications where users can be defined
-directly in the configuration class.
-
-For example, a configuration can create:
-
-- A user with role `USER`.
-- An admin with role `ADMIN`.
-
-The passwords should be encoded before being stored.
-
-### UserDetails
-
-`UserDetails` represents the user inside Spring Security.
-
-It provides user-related information through methods such as:
-
-- `getUsername()`
-- `getPassword()`
-- `getAuthorities()`
-
-In real applications, the application's own `UserEntity` can implement
-`UserDetails`. This allows Spring Security to use the application's user table
-for authentication and authorization.
-
-### PasswordEncoder
-
-`PasswordEncoder` is responsible for encoding and verifying passwords.
-
-It has two important responsibilities:
-
-- `encode()`: Converts a raw password into a secure encoded password.
-- `matches()`: Compares the raw password entered during login with the stored
-  encoded password.
-
-Common implementations include:
-
-- `BCryptPasswordEncoder`
-- `Pbkdf2PasswordEncoder`
-- `SCryptPasswordEncoder`
-
-### SecurityContext
-
-After successful authentication, the authenticated user is stored in the
-`SecurityContext`.
-
-The `SecurityContext` is stored inside `SecurityContextHolder`.
-
-Once stored there, the authenticated user's details are available throughout the
-application for the current request.
-
-### Complete Authentication Flow
-
-The complete internal flow is:
-
-1. Client sends a login request.
-2. The request enters Spring Security's filter chain.
-3. A security filter creates an `Authentication` object from the submitted
-   credentials.
-4. The `Authentication` object is passed to `AuthenticationManager`.
-5. `AuthenticationManager` delegates authentication to `ProviderManager`.
-6. `ProviderManager` checks available `AuthenticationProvider`s.
-7. `DaoAuthenticationProvider` uses `UserDetailsService` to load the user.
-8. `UserDetailsService` returns a `UserDetails` object.
-9. `PasswordEncoder` verifies the submitted password.
-10. If authentication succeeds, the authenticated user is stored in
-    `SecurityContext`.
-11. The request continues to the Dispatcher Servlet and then to the controller.
-
-### Summary
-
-Spring Security internally works by placing a security filter layer before the
-controller layer. The filters intercept requests, the `AuthenticationManager`
-coordinates authentication, `AuthenticationProvider`s perform the actual
-credential validation, `UserDetailsService` loads user data, `PasswordEncoder`
-checks passwords securely, and `SecurityContext` stores the authenticated user.
