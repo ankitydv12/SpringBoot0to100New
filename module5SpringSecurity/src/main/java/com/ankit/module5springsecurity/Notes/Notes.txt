@@ -38,3 +38,7 @@ Commit 5.4.2 Disable the UserDetailService bean by commenting the service annota
            return new InMemoryUserDetailsManager(normaluser,admin,manager);
        }
 
+       remove csrf
+       stateless session
+
+

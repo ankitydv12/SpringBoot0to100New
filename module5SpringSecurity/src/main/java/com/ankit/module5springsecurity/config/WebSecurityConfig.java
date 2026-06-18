@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +26,9 @@ public class WebSecurityConfig {
                                 .requestMatchers("/posts").permitAll() // request posts will be bypass from the authentication
                                 .requestMatchers("/post/**").hasAnyRole("ADMIN","MANAGER")
                                 .anyRequest().authenticated())
+                .csrf(csrf -> csrf.disable()) // csrf is disabled
+                .sessionManagement(sessionconfig->sessionconfig
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //session become stateless
                 .formLogin(Customizer.withDefaults());
         return  httpSecurity.build();
     }
