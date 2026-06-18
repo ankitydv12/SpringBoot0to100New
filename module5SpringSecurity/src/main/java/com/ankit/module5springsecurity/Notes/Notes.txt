@@ -1,40 +1,40 @@
-Commit 5.4.1 Customized SecurityFilterChain (WebSecurityConfig)
-             ,Default Behaviour , Adding Authentication ,
-             Global AuthenticationManager configured with UserDetailsService
+Commit 5.4.2 Disable the UserDetailService bean by commenting the service annotation
+    If the Service layer is disabled then the Then global Authentication Mannager is configured with UserDetailService bean with name inMemoryUserDetailsManager
 
-# Spring Security Notes
-
-## Customizing SecurityFilterChain (WebSecurityConfig)
-In Spring Security, the `SecurityFilterChain` is the core of web security configuration.
-We can customize it by defining a `@Bean` of type `SecurityFilterChain` in a configuration class.
-
-Key components from the configuration:
-- `@Configuration` & `@EnableWebSecurity`: These annotations mark the class as a security configuration class and enable Spring Security's web security support.
-- `SecurityFilterChain` Bean: By defining this bean, we can override the default Spring Boot auto-configuration for security and provide our own custom rules.
-- `HttpSecurity`: The `HttpSecurity` builder is used to configure web based security for specific http requests.
-- `httpSecurity.formLogin(Customizer.withDefaults())`: This specific line enables the default form-based authentication (the default Spring Security login page).
-- `httpSecurity.build()`: Finally, we call `.build()` to create and return the customized `SecurityFilterChain` instance.
-
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception
-    {
-        httpSecurity.formLogin(Customizer.withDefaults());
-        return  httpSecurity.build();
-    }
-    In this code the foam login is default and their is no authentication any request can be made without authentication
-    by default it contain the CSRF token
-
-
-
-Adding Authentication
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception
-    {
-        httpSecurity
+    bypassing the request from authentication:
+            httpSecurity
                 .authorizeHttpRequests(auth ->
-                        auth.anyRequest().authenticated())
+                        auth
+                                .requestMatchers("/posts/**").permitAll() // request posts will be bypass from the authentication
+                                .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults());
-        return  httpSecurity.build();
-    }
-    One this to be noted if i enter the application.properties credentials in login page it show
-    Error because the The Global AuthenticationManager configured with UserDetailsService bean with name userServiceImpl and userServiceImpl do not provide credentials
+
+    requestMatchers("/posts").permitAll -------> only /posts is bypassed
+                   ("/posts/**").permitAll -----> Bypass post and after post
+
+   # Specific role person can access the url:
+   Specific role person are only allowed like ADMIN , Manager
+   Create role :
+    @Bean
+       public UserDetailsService inmemmoryUserDetail(){
+           UserDetails normaluser = User
+                   .withUsername("abc")
+                   .password(passwordEncoder().encode("abc"))
+                   .roles("NORMAL_USER")
+                   .build();
+
+           UserDetails admin = User
+                   .withUsername("ankit")
+                   .password(passwordEncoder().encode("ankit"))
+                   .roles("ADMIN")
+                   .build();
+
+           UserDetails manager = User
+                   .withUsername("manager")
+                   .password(passwordEncoder().encode("manager"))
+                   .roles("MANAGER")
+                   .build();
+
+           return new InMemoryUserDetailsManager(normaluser,admin,manager);
+       }
 
