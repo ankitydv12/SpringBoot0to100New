@@ -1,44 +1,6 @@
-Commit 5.4.2 Disable the UserDetailService bean by commenting the service annotation
-    If the Service layer is disabled then the Then global Authentication Mannager is configured with UserDetailService bean with name inMemoryUserDetailsManager
+Commit 5.5 JWT
 
-    bypassing the request from authentication:
-            httpSecurity
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers("/posts/**").permitAll() // request posts will be bypass from the authentication
-                                .anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());
+Read handbook
 
-    requestMatchers("/posts").permitAll -------> only /posts is bypassed
-                   ("/posts/**").permitAll -----> Bypass post and after post
-
-   # Specific role person can access the url:
-   Specific role person are only allowed like ADMIN , Manager
-   Create role :
-    @Bean
-       public UserDetailsService inmemmoryUserDetail(){
-           UserDetails normaluser = User
-                   .withUsername("abc")
-                   .password(passwordEncoder().encode("abc"))
-                   .roles("NORMAL_USER")
-                   .build();
-
-           UserDetails admin = User
-                   .withUsername("ankit")
-                   .password(passwordEncoder().encode("ankit"))
-                   .roles("ADMIN")
-                   .build();
-
-           UserDetails manager = User
-                   .withUsername("manager")
-                   .password(passwordEncoder().encode("manager"))
-                   .roles("MANAGER")
-                   .build();
-
-           return new InMemoryUserDetailsManager(normaluser,admin,manager);
-       }
-
-       remove csrf
-       stateless session
-
-
+Implemented JwtService
+Run in test 
