@@ -1,6 +1,69 @@
-Commit 5.5 JWT
+# JWT (JSON Web Token) Explained
 
-Read handbook
+A JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties. The claims in a JWT are encoded as a JSON object that is used as the payload of a JSON Web Signature (JWS) structure or as the plaintext of a JSON Web Encryption (JWE) structure, enabling the claims to be digitally signed or integrity protected with a Message Authentication Code (MAC) and/or encrypted.
 
-Implemented JwtService
-Run in test 
+A JWT consists of three parts separated by dots (`.`):
+
+1.  **Header**: Contains metadata about the token, such as the token type (JWT) and the signing algorithm being used (e.g., HMAC SHA256 or RSA).
+    ```json
+    {
+      "alg": "HS256",
+      "typ": "JWT"
+    }
+    ```
+
+2.  **Payload (Claims)**: Contains the statements about an entity (typically, the user) and additional data. There are three types of claims:
+    *   **Registered claims**: Predefined claims like `iss` (issuer), `exp` (expiration time), `sub` (subject), `aud` (audience).
+    *   **Public claims**: Custom claims defined by those using JWTs, but should be defined in the IANA JSON Web Token Registry or be a URI that contains a collision-resistant namespace.
+    *   **Private claims**: Custom claims created to share information between parties that agree on using them.
+    ```json
+    {
+      "sub": "1234567890",
+      "name": "John Doe",
+      "admin": true,
+      "iat": 1516239022
+    }
+    ```
+
+3.  **Signature**: To create the signature part, you have to take the encoded header, the encoded payload, a secret, the algorithm specified in the header, and sign that. The signature is used to verify that the sender of the JWT is who it says it is and to ensure that the message wasn't changed along the way.
+    ```
+    HMACSHA256(
+      base64UrlEncode(header) + "." +
+      base64UrlEncode(payload),
+      secret
+    )
+    ```
+
+The final token is a long string of these three parts concatenated by dots.
+
+---
+
+# JwtService Documentation
+
+The `JwtService` is a Spring `@Service` responsible for handling all JWT-related operations. It provides methods to generate a JWT for a user and to parse a token to extract information from it.
+
+### Key Components:
+
+*   **`secretKey`**: A private string injected from the application's properties (`application.properties` or `application.yml`) via the `@Value("${spring.jwt.token}")` annotation. This key is crucial for signing and verifying tokens.
+
+*   **`generateKey()`**: A private helper method that converts the `secretKey` string into a `SecretKey` object required by the `jjwt` library. It uses `Keys.hmacShaKeyFor` with UTF-8 encoding.
+
+### Core Methods:
+
+1.  **`generateJwtToken(User user)`**:
+    *   **Purpose**: Creates a new JWT string for a given `User` object.
+    *   **Process**:
+        *   It uses `Jwts.builder()` to construct the token.
+        *   **Subject (`sub`)**: The user's ID is set as the subject of the token. This is a standard claim.
+        *   **Custom Claims**: It adds custom claims like the user's `email` and their `Role`.
+        *   **Timestamps**: It sets the `issuedAt` (`iat`) to the current time and the `expiration` (`exp`) to a future time (e.g., 60 seconds from creation).
+        *   **Signing**: The token is signed using the `generateKey()` method and the HMAC-SHA algorithm.
+        *   **Compaction**: Finally, `compact()` is called to serialize the JWT into its final string form.
+
+2.  **`getIdFromJwtToken(String token)`**:
+    *   **Purpose**: Parses an incoming JWT string to extract the user's ID.
+    *   **Process**:
+        *   It uses `Jwts.parser()`.
+        *   **Verification**: It provides the `SecretKey` using `verifyWith(generateKey())` to ensure the token's signature is valid. If the signature is invalid or the token is expired, this step will throw an exception.
+        *   **Parsing**: It builds the parser and calls `parseSignedClaims(token)` to get the claims from the token.
+        *   **Extraction**: It retrieves the payload (`Claims`) and then gets the subject (`getSubject()`), which contains the user ID, and converts it to a `Long`.
