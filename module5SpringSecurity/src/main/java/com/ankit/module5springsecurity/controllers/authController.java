@@ -1,7 +1,10 @@
 package com.ankit.module5springsecurity.controllers;
 
+import com.ankit.module5springsecurity.advice.ApiResponse;
+import com.ankit.module5springsecurity.dto.LoginDTO;
 import com.ankit.module5springsecurity.dto.SignupDTO;
 import com.ankit.module5springsecurity.dto.UserDTO;
+import com.ankit.module5springsecurity.services.Impl.AuthService;
 import com.ankit.module5springsecurity.services.Impl.UserServiceImpl;
 import com.ankit.module5springsecurity.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class authController {
     private final UserServiceImpl userService;
+    private  final AuthService authService;
     @PostMapping({"/signup", "/singup"})
     public ResponseEntity<UserDTO> signup(@RequestBody SignupDTO signupDTO){
         UserDTO userDTO = userService.signup(signupDTO);
         return ResponseEntity.ok(userDTO);
+    }
+    @PostMapping("/login")
+    public ApiResponse<String> login(@RequestBody LoginDTO loginDTO)
+    {
+        String token = authService.login(loginDTO);
+        return new ApiResponse<>(token);
     }
 }
