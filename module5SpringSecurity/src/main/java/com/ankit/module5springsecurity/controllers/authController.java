@@ -7,6 +7,9 @@ import com.ankit.module5springsecurity.dto.UserDTO;
 import com.ankit.module5springsecurity.services.Impl.AuthService;
 import com.ankit.module5springsecurity.services.Impl.UserServiceImpl;
 import com.ankit.module5springsecurity.services.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,9 +29,13 @@ public class authController {
         return ResponseEntity.ok(userDTO);
     }
     @PostMapping("/login")
-    public ApiResponse<String> login(@RequestBody LoginDTO loginDTO)
+    public ApiResponse<String> login(@RequestBody LoginDTO loginDTO , HttpServletRequest request , HttpServletResponse response)
     {
         String token = authService.login(loginDTO);
+        Cookie cookie = new Cookie("token",token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        response.addCookie(cookie);
         return new ApiResponse<>(token);
     }
 }

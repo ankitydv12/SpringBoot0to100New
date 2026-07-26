@@ -1,124 +1,93 @@
-Commit: 5.6.2 login with jwt authentication
+Commit: 5.6.3 Sending Cookies with login
+
 
 ============================================================
-JWT (JSON Web Token)
+Cookies in authController
 ============================================================
 
-What is JWT?
--------------
-JWT is a compact, signed token used to identify an authenticated user.
-It allows the server to authenticate requests without storing a login
-session in memory or in a database.
+What is a Cookie?
+-----------------
+A cookie is a small piece of data that the server sends to the browser.
+The browser stores it and automatically sends it back with future requests
+to the matching server and path.
 
-JWT has three parts:
-
-    header.payload.signature
-
-    Header      -> Algorithm and token type
-    Payload     -> Claims, such as user id, email, and roles
-    Signature   -> Proves that the token was created by the server and
-                   has not been changed
-
-Important: JWT payloads are encoded, not encrypted. Do not store passwords
-or other sensitive information inside a token.
+Cookies are commonly used to keep a login token between requests. In this
+project, the JWT is stored in a cookie named `token` after a successful login.
 
 
-Login Flow in This Project
---------------------------
-1. Client sends email and password to:
+Cookie Flow in the Login API
+----------------------------
+1. The client sends login details to:
 
        POST /auth/login
 
-2. authController passes the LoginDTO to AuthService.
+2. AuthService authenticates the user and generates a JWT.
 
-3. AuthService calls AuthenticationManager.authenticate(...).
-   Spring Security checks the email and the BCrypt-encoded password.
+3. authController creates a cookie containing that JWT:
 
-4. After successful authentication, AuthService gets the authenticated User.
+       Cookie cookie = new Cookie("token", token);
 
-5. JwtService.generateJwtToken(user) creates and signs a JWT.
+4. `setHttpOnly(true)` marks the cookie as HttpOnly.
 
-6. The token is returned to the client. The client should send it on later
-   requests using the Authorization header:
+5. `response.addCookie(cookie)` sends the cookie to the browser through the
+   HTTP `Set-Cookie` response header.
 
-       Authorization: Bearer <jwt-token>
-
-
-JWT Creation in JwtService
---------------------------
-The token currently contains these claims:
-
-    subject  -> User id
-    email    -> User email
-    Role     -> ADMIN and USER
-    iat      -> Issued-at time
-    exp      -> Expiration time
-
-The token is signed with the secret configured by:
-
-    spring.jwt.token
-
-The same secret key must be used both to create and to validate tokens.
-The current expiration time is one minute:
-
-    System.currentTimeMillis() + 1000 * 60
+6. The browser stores the cookie and sends it automatically on later
+   requests to the same application.
 
 
-Reading a JWT
--------------
-JwtService.getIdFromJwtToken(token) does the following:
+Important Code
+--------------
+    String token = authService.login(loginDTO);
 
-1. Creates the signing key from the configured secret.
-2. Verifies the token signature.
-3. Checks that the token is valid and not expired.
-4. Reads the subject claim.
-5. Converts the subject into the user's Long id.
+    Cookie cookie = new Cookie("token", token);
+    cookie.setHttpOnly(true);
+    response.addCookie(cookie);
 
-If the token is invalid, modified, or expired, token parsing fails and the
-request must be rejected.
+The endpoint also returns the token inside `ApiResponse`. Therefore, the JWT
+is currently available both in the response body and in the cookie.
 
 
-Stateless Security
-------------------
-WebSecurityConfig uses:
-
-    SessionCreationPolicy.STATELESS
-
-This means the server does not store an HTTP session for the user. Every
-protected request must contain a valid Bearer token.
-
-The login and signup endpoints are public because `/auth/**` is permitted.
-Other protected endpoints must be configured to require authentication and
-appropriate roles.
-
-
-Security Rules
--------------
-- Keep the JWT secret outside source control, preferably in an environment
-  variable or a protected configuration file.
-- Use a sufficiently long, random secret for HMAC signing.
-- Never log the JWT or send it in a URL query parameter.
-- Use HTTPS so the token cannot be intercepted in transit.
-- Keep access tokens short-lived; use refresh tokens if long sessions are
-  required.
-- Add a JWT authentication filter before protected requests are processed.
-  The filter should read the Bearer token, validate it, load the user, and
-  place the authenticated user in Spring SecurityContext.
-
-
-Request Example
+HttpOnly Cookie
 ---------------
-Login:
+`HttpOnly` prevents JavaScript in the browser from reading the cookie through
+`document.cookie`. This reduces the impact of many cross-site scripting (XSS)
+attacks because client-side scripts cannot directly access the JWT.
 
-    POST /auth/login
-    Content-Type: application/json
+HttpOnly does not prevent the browser from sending the cookie with requests,
+and it does not protect against every type of attack. CSRF protection and
+proper cookie configuration are still important.
 
-    {
-        "email": "user@example.com",
-        "password": "password"
-    }
 
-Authenticated request:
+Recommended Cookie Attributes
+-----------------------------
+For a production authentication cookie, configure these attributes:
 
-    GET /post/1
-    Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+    HttpOnly  -> JavaScript cannot read the cookie
+    Secure    -> Send the cookie only over HTTPS
+    SameSite  -> Helps prevent cross-site request forgery (CSRF)
+    Path      -> Restricts which application paths receive the cookie
+    Max-Age   -> Controls how long the cookie remains valid
+
+The current code sets only `HttpOnly`. `Secure`, `SameSite`, `Path`, and
+`Max-Age` should be added according to the deployment environment and the
+desired login lifetime.
+
+
+Cookie Authentication vs Authorization Header
+----------------------------------------------
+There are two common ways to send a JWT:
+
+    Cookie:
+        The browser sends it automatically. Use HttpOnly, Secure, and
+        SameSite settings, and consider CSRF protection.
+
+    Authorization header:
+        The client sends `Authorization: Bearer <token>` explicitly. This
+        is common for APIs and mobile clients, but JavaScript must store and
+        read the token somehow.
+
+Choose one consistent approach. If the application authenticates from the
+cookie, a JWT filter must read the `token` cookie, validate the JWT, and put
+the authenticated user into Spring SecurityContext.
+
