@@ -2,7 +2,6 @@ package com.ankit.module5springsecurity.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,39 +22,39 @@ public class WebSecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/posts").permitAll() // request posts will be bypass from the authentication
+                                .requestMatchers("/posts", "/auth/**").permitAll()
                                 .requestMatchers("/post/**").hasAnyRole("ADMIN","MANAGER")
                                 .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable()) // csrf is disabled
                 .sessionManagement(sessionconfig->sessionconfig
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //session become stateless
-                .formLogin(Customizer.withDefaults());
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)); //session become stateless
+//                .formLogin(Customizer.withDefaults());
         return  httpSecurity.build();
     }
 
     //creating inmemory user
-    @Bean
-    public UserDetailsService inmemmoryUserDetail(){
-        UserDetails normaluser = User
-                .withUsername("abc")
-                .password(passwordEncoder().encode("abc"))
-                .roles("NORMAL_USER")
-                .build();
-
-        UserDetails admin = User
-                .withUsername("ankit")
-                .password(passwordEncoder().encode("ankit"))
-                .roles("ADMIN")
-                .build();
-
-        UserDetails manager = User
-                .withUsername("manager")
-                .password(passwordEncoder().encode("manager"))
-                .roles("MANAGER")
-                .build();
-
-        return new InMemoryUserDetailsManager(normaluser,admin,manager);
-    }
+//    @Bean
+//    public UserDetailsService inMemoryUserDetail(){
+//        UserDetails normaluser = User
+//                .withUsername("abc")
+//                .password(passwordEncoder().encode("abc"))
+//                .roles("NORMAL_USER")
+//                .build();
+//
+//        UserDetails admin = User
+//                .withUsername("ankit")
+//                .password(passwordEncoder().encode("ankit"))
+//                .roles("ADMIN")
+//                .build();
+//
+//        UserDetails manager = User
+//                .withUsername("manager")
+//                .password(passwordEncoder().encode("manager"))
+//                .roles("MANAGER")
+//                .build();
+//
+//        return new InMemoryUserDetailsManager(normaluser,admin,manager);
+//    }
 
     //password encoder without it spring through error
     @Bean
