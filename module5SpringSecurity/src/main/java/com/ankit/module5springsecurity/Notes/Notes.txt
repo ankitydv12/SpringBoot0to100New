@@ -1,1 +1,2 @@
-Commit: 
+Commit: 5.6.4 getting authentication in the posts/1
+we can access the user from securitycontext in the posts/1 by using the securitycontextholder
