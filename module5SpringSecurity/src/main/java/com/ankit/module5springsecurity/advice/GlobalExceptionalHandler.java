@@ -1,8 +1,10 @@
 package com.ankit.module5springsecurity.advice;
 
 import com.ankit.module5springsecurity.exception.ResourceNotFoundException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -17,5 +19,25 @@ public class GlobalExceptionalHandler {
                 .message(exception.getMessage()) // set the message of the ApiError class
                 .build(); // this will creat the object  of the api class
         return new ResponseEntity<>(apiError,HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentialsException(BadCredentialsException exception)
+    {
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .message(exception.getLocalizedMessage())
+                .build();
+        return new ResponseEntity<>(apiError,HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiError> handleJwtException(JwtException exception)
+    {
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .message(exception.getLocalizedMessage())
+                .build();
+        return new ResponseEntity<>(apiError,HttpStatus.UNAUTHORIZED);
     }
 }

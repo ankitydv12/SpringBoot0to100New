@@ -1,2 +1,85 @@
-Commit: 5.6.4 getting authentication in the posts/1
-we can access the user from securitycontext in the posts/1 by using the securitycontextholder
+Commit: 5.8 Authentication Exception Handling
+======================================
+AuthenticationException
+======================================
+
+AuthenticationException contains several exceptions, Use HttpStatus 401 –
+UnAuthorized to handle the response:
+• AccountExpiredException
+• BadCredentialsException
+• CredentialsExpiredException
+• AuthenticationCredentialsNotFoundException
+• SessionAuthenticationExceptio
+
+
+======================================
+JWT Exception Handling in jwtAuthFilter
+======================================
+
+In jwtAuthFilter, the JWT-related logic is wrapped inside a try-catch block:
+
+    try {
+        // extract Authorization header
+        // extract token
+        // read userId from token
+        // load user
+        // set Authentication in SecurityContextHolder
+    } catch (Exception e) {
+        exceptionResolver.resolveException(request, response, null, e);
+    }
+
+Why this is used:
+
+1. Any exception during JWT processing is caught at the filter level.
+   Examples:
+   • invalid token
+   • expired token
+   • malformed token
+   • user not found
+   • unexpected runtime exception
+
+2. Instead of letting the filter fail silently or return an unstructured server error,
+   the exception is forwarded to Spring's HandlerExceptionResolver.
+
+3. HandlerExceptionResolver sends the exception to the global exception handling
+   mechanism, so the API can return a clean and consistent error response.
+
+Role of exceptionResolver:
+
+    @Autowired
+    @Qualifier("handlerExceptionResolver")
+    private HandlerExceptionResolver exceptionResolver;
+
+This resolver is a Spring component that converts exceptions into HTTP responses.
+That means JWT errors raised inside the filter can still be handled in a centralized way.
+
+Important point:
+
+Filters run before the request reaches the controller.
+Because of that, normal controller-level exception handling does not automatically
+handle filter exceptions unless we explicitly delegate them using HandlerExceptionResolver.
+
+Flow in this filter:
+
+1. Read Authorization header.
+2. If header is missing or does not start with "Bearer ", continue the filter chain.
+3. Extract the token.
+4. Get userId from JWT using jwtService.getIdFromJwtToken(token).
+5. Load the user from the database.
+6. Create UsernamePasswordAuthenticationToken.
+7. Store authentication in SecurityContextHolder.
+8. If any step fails, call exceptionResolver.resolveException(...).
+
+Why this design is useful:
+
+• Keeps JWT error handling centralized
+• Prevents raw exceptions from breaking the request pipeline
+• Helps return proper HTTP responses such as 401 Unauthorized
+• Makes the filter cleaner and easier to maintain
+
+Short summary:
+
+The "jwtException concept" here means:
+JWT-related exceptions inside jwtAuthFilter are caught and passed to
+HandlerExceptionResolver so Spring can generate a proper API error response
+instead of letting the filter crash the request.

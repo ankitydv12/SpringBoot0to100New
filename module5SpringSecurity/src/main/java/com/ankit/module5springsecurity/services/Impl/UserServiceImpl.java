@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username)
-                .orElseThrow(()-> new ResourceNotFoundException("User not found"));
+                .orElseThrow(()-> new BadCredentialsException("User not found"));
     }
 
     public UserDTO signup(@RequestBody SignupDTO signupDTO)
