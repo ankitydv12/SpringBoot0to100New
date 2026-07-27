@@ -48,4 +48,9 @@ public class UserServiceImpl implements UserDetailsService {
 
         return modelMapper.map(savedUser,UserDTO.class);
     }
+
+    public User getById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                ()->new ResourceNotFoundException("User not found with id "+userId));
+    }
 }

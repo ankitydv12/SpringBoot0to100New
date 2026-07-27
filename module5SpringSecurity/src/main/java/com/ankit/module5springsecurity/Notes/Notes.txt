@@ -1,93 +1,177 @@
-Commit: 5.6.3 Sending Cookies with login
-
+Commit: 5.6.4 jwtAuthFilter
 
 ============================================================
-Cookies in authController
+jwtAuthFilter in SecurityFilterChain
 ============================================================
 
-What is a Cookie?
------------------
-A cookie is a small piece of data that the server sends to the browser.
-The browser stores it and automatically sends it back with future requests
-to the matching server and path.
+What jwtAuthFilter is
+---------------------
+`jwtAuthFilter` is a custom Spring Security filter that runs once for each
+request because it extends `OncePerRequestFilter`.
 
-Cookies are commonly used to keep a login token between requests. In this
-project, the JWT is stored in a cookie named `token` after a successful login.
+Its job is simple:
 
-
-Cookie Flow in the Login API
-----------------------------
-1. The client sends login details to:
-
-       POST /auth/login
-
-2. AuthService authenticates the user and generates a JWT.
-
-3. authController creates a cookie containing that JWT:
-
-       Cookie cookie = new Cookie("token", token);
-
-4. `setHttpOnly(true)` marks the cookie as HttpOnly.
-
-5. `response.addCookie(cookie)` sends the cookie to the browser through the
-   HTTP `Set-Cookie` response header.
-
-6. The browser stores the cookie and sends it automatically on later
-   requests to the same application.
+1. Read the JWT from the request
+2. Validate and parse the token
+3. Identify the user from the token
+4. Put an authenticated object into Spring SecurityContext
+5. Let the request continue through the filter chain
 
 
-Important Code
---------------
-    String token = authService.login(loginDTO);
+Where it is added in WebSecurityConfig
+--------------------------------------
+Inside `WebSecurityConfig`, the filter is registered here:
 
-    Cookie cookie = new Cookie("token", token);
-    cookie.setHttpOnly(true);
-    response.addCookie(cookie);
+    .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
-The endpoint also returns the token inside `ApiResponse`. Therefore, the JWT
-is currently available both in the response body and in the cookie.
+Meaning:
 
+- Spring will run `jwtAuthFilter` before `UsernamePasswordAuthenticationFilter`
+- JWT-based authentication happens early in the chain
+- If the user is authenticated by JWT, later security checks can use that
+  authentication
 
-HttpOnly Cookie
----------------
-`HttpOnly` prevents JavaScript in the browser from reading the cookie through
-`document.cookie`. This reduces the impact of many cross-site scripting (XSS)
-attacks because client-side scripts cannot directly access the JWT.
-
-HttpOnly does not prevent the browser from sending the cookie with requests,
-and it does not protect against every type of attack. CSRF protection and
-proper cookie configuration are still important.
+This is important because `.anyRequest().authenticated()` depends on
+`SecurityContextHolder` already containing a valid authentication object.
 
 
-Recommended Cookie Attributes
+Why it is needed
+----------------
+This project uses:
+
+    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+That means Spring Security will not rely on HTTP session-based login state.
+So each request must carry its own authentication data, which is the JWT.
+
+Because of this, the filter must check every incoming request and rebuild the
+authentication from the token.
+
+
+Flow of jwtAuthFilter
+---------------------
+For each request, the filter does the following:
+
+1. Reads the `Authorization` header
+
+       final String requestToken = request.getHeader("Authorization");
+
+2. Checks whether the header exists and starts with `Bearer `
+
+       Authorization: Bearer <token>
+
+   If not, the filter does nothing and passes the request forward:
+
+       filterChain.doFilter(request, response);
+
+3. Extracts the token value by removing `Bearer `
+
+4. Calls `jwtService.getIdFromJwtToken(token)` to get the user id from the JWT
+
+5. Checks whether:
+
+   - user id was extracted successfully
+   - no authentication is already present in `SecurityContextHolder`
+
+6. Loads the user from database/service:
+
+       User user = userService.getById(userId);
+
+7. Creates a `UsernamePasswordAuthenticationToken`
+
+8. Stores that authentication in `SecurityContextHolder`
+
+After this, Spring Security treats the request as authenticated.
+
+
+Core authentication code
+------------------------
+    Long userId = jwtService.getIdFromJwtToken(token);
+
+    if (userId != null &&
+        SecurityContextHolder.getContext().getAuthentication() == null) {
+
+        User user = userService.getById(userId);
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(user, null, null);
+
+        authenticationToken.setDetails(
+                new WebAuthenticationDetailsSource().buildDetails(request)
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    }
+
+
+Role of SecurityContextHolder
 -----------------------------
-For a production authentication cookie, configure these attributes:
+`SecurityContextHolder` stores authentication details for the current request.
 
-    HttpOnly  -> JavaScript cannot read the cookie
-    Secure    -> Send the cookie only over HTTPS
-    SameSite  -> Helps prevent cross-site request forgery (CSRF)
-    Path      -> Restricts which application paths receive the cookie
-    Max-Age   -> Controls how long the cookie remains valid
+When `jwtAuthFilter` sets the authentication there, Spring Security can later
+decide:
 
-The current code sets only `HttpOnly`. `Secure`, `SameSite`, `Path`, and
-`Max-Age` should be added according to the deployment environment and the
-desired login lifetime.
+- whether the request is authenticated
+- which controller methods can be accessed
+- which user is currently logged in
+
+Without setting `SecurityContextHolder`, protected endpoints would still be
+treated as unauthenticated.
 
 
-Cookie Authentication vs Authorization Header
-----------------------------------------------
-There are two common ways to send a JWT:
+Public vs protected endpoints
+-----------------------------
+In `WebSecurityConfig`:
 
-    Cookie:
-        The browser sends it automatically. Use HttpOnly, Secure, and
-        SameSite settings, and consider CSRF protection.
+- `GET /posts` and `GET /posts/**` are public
+- `/auth/**` is public
+- every other request requires authentication
 
-    Authorization header:
-        The client sends `Authorization: Bearer <token>` explicitly. This
-        is common for APIs and mobile clients, but JavaScript must store and
-        read the token somehow.
+So if a request goes to a protected endpoint, `jwtAuthFilter` must set valid
+authentication before authorization rules are evaluated.
 
-Choose one consistent approach. If the application authenticates from the
-cookie, a JWT filter must read the `token` cookie, validate the JWT, and put
-the authenticated user into Spring SecurityContext.
 
+Important observation in this project
+-------------------------------------
+The current filter reads JWT only from:
+
+    Authorization header
+
+Specifically:
+
+    request.getHeader("Authorization")
+
+So even though earlier notes discuss storing JWT in a cookie, this filter does
+not read the cookie named `token`.
+
+That means the current active authentication mechanism in the filter chain is:
+
+    Authorization: Bearer <token>
+
+not cookie-based JWT authentication.
+
+If you want cookie-based JWT authentication, then this filter must be changed
+to read the JWT from `request.getCookies()` instead of only checking the
+`Authorization` header.
+
+
+Why addFilterBefore is correct here
+-----------------------------------
+`UsernamePasswordAuthenticationFilter` is commonly used for username/password
+login processing.
+
+Since JWT authentication should happen before Spring reaches that stage,
+placing `jwtAuthFilter` before it is the correct design for stateless API
+security.
+
+
+Summary
+-------
+- `jwtAuthFilter` authenticates each request using JWT
+- it runs once per request because it extends `OncePerRequestFilter`
+- it is inserted into `SecurityFilterChain` using `addFilterBefore(...)`
+- it reads `Authorization: Bearer <token>`
+- it extracts user id using `jwtService`
+- it loads the user and sets authentication in `SecurityContextHolder`
+- this allows protected endpoints to pass `.authenticated()`
+- current code is header-based JWT auth, not cookie-based JWT auth
