@@ -1,0 +1,51 @@
+Commit:Mysql and postman using docker
+
+============================================================
+Setting Mysql and Postman in github virtual machine using docker
+============================================================
+1. Verify docker 
+    * docker --version
+    * docker compose version
+2. Create a compose.yml in root directory in the root folder
+    version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: securityapp-mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: securityapp
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  
+3. Start the database (be in your project directory)
+    * docker compose up -d
+    * docker ps --> check status
+
+4. Verify the Mysql
+    * docker exec -it securityapp-mysql mysql -u root -p
+
+Explanation: 
+    docker is lightweight virtual machine for running application 
+    we download mysql image in the docker and run it 
+
+    * image: mysql:8.4 -> "Download MySQL version 8.4 and use it."
+    * environment: ->  setting the env variable 
+    * volumes:
+        - mysql_data:/var/lib/mysql  --> Store the database data outside of the container , if the container stop data preserve
+
+=============================================
+Postman
+=============================================
+for postman use the vscode extension 
