@@ -1,5 +1,6 @@
 package com.ankit.module5springsecurity.controllers;
 
+import com.ankit.module5springsecurity.advice.ApiResponse;
 import com.ankit.module5springsecurity.dto.PostDTO;
 import com.ankit.module5springsecurity.entities.User;
 import com.ankit.module5springsecurity.services.PostService;
@@ -24,9 +25,16 @@ public class PostController {
     }
 
     @PostMapping
-    public PostDTO createPost(@RequestBody PostDTO input)
+    public ApiResponse<PostDTO> createPost(@RequestBody PostDTO input)
     {
-        return postService.createNewPost(input);
+        System.out.println("POST API HIT");
+        System.out.println(input);
+
+        PostDTO op = postService.createNewPost(input);
+
+        System.out.println("Saved = " + op);
+
+        return new ApiResponse<>(op);
     }
 
     @GetMapping("/{postId}")
