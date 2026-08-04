@@ -1,6 +1,7 @@
 package com.ankit.module5springsecurity.config;
 
 import com.ankit.module5springsecurity.filters.jwtAuthFilter;
+import com.ankit.module5springsecurity.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,19 +25,24 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final jwtAuthFilter jwtAuthFilter;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception
     {
         httpSecurity
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers(HttpMethod.GET, "/posts", "/posts/**").permitAll()
-                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers( "/posts", "/error" , "/auth/**","/home.html").permitAll()
+
                                 .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable()) // csrf is disabled
                 .sessionManagement(sessionconfig->sessionconfig
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))//session become stateless
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2LoginConfi ->
+                        oauth2LoginConfi.failureUrl("/login?error=true") //Handle the failure
+                                .successHandler(oAuth2SuccessHandler) //handle the sucess
+                );
 
 //                .formLogin(Customizer.withDefaults());
 

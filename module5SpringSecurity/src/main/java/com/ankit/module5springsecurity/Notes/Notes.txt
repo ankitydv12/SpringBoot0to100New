@@ -1,185 +1,159 @@
-Commit:
-Access Token and Refresh Token
-==============================
+Commit :6.2 OAuth2ClientAuthentication
+=======================================================
+ ██████   █████   ██    ██ ████████ ██   ██ ██████      ██████      ██████ ██      ██ ███████ ███    ██ ████████
+██    ██ ██   ██ ██    ██    ██    ██   ██      ██    ██          ██      ██      ██ ██      ████   ██    ██
+██    ██ ███████ ██    ██    ██    ███████  █████     ██          ██      ██      ██ █████   ██ ██  ██    ██
+██    ██ ██   ██ ██    ██    ██    ██   ██ ██         ██          ██      ██      ██ ██      ██  ██ ██    ██
+ ██████  ██   ██  ██████     ██    ██   ██ ███████     ██████      ██████ ███████ ██ ███████ ██   ████    ██
 
-Introduction
-------------
-In JWT-based authentication, two tokens are commonly used:
+ █████  ██    ██ ████████ ██   ██ ███████ ███    ██ ████████ ██  ██████  █████  ████████ ██  ██████  ███    ██
+██   ██ ██    ██    ██    ██   ██ ██      ████   ██    ██    ██ ██      ██   ██    ██    ██ ██    ██ ████   ██
+███████ ██    ██    ██    ███████ █████   ██ ██  ██    ██    ██ ██      ███████    ██    ██ ██    ██ ██ ██  ██
+██   ██ ██    ██    ██    ██   ██ ██      ██  ██ ██    ██    ██ ██      ██   ██    ██    ██ ██    ██ ██  ██ ██
+██   ██  ██████     ██    ██   ██ ███████ ██   ████    ██    ██  ██████ ██   ██    ██    ██  ██████  ██   ████
+=======================================================
 
-1. Access Token
-2. Refresh Token
+We can Authenticate user/client with the 3rd party authentication provider like google , facebook , github , linkedin etc.
 
-Both tokens work together to keep the application secure while also giving the user a smooth login experience.
+For the authentication with google we use OAuth2 and we need go create a OAuth Client
 
+Steps
+0. Add dependencies
+    dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-oauth2-client</artifactId>
+    </dependency>
+1. Go on the Google Console website
+2. Create a Project On Google Console and then select it
+3. From the 3Line(Nav Bar) go to the Api and Services -> Credentials
+4. From Credentials , Create new Credentials -> OAuth Client ID
+5. Complete the process
 
-What is an Access Token?
-------------------------
-An access token is a short-lived token used to access protected APIs.
+Imp :
+    Authorized JavaScript origins -> add the urls and suburl from where your account make request to the Oauth2
+    Authorized redirect URIs      -> In this sections add the url of the your backend system which receive the authenticated token from google
+    Testing User -> add google email of the testing user
+    User Type -> External
+    Scope -> the permission you want like email , name etc . Their are 2 types of scope Non Sensitive and Sensitive
+             Add Non Sensitive : email,profie,openid
 
-Main idea:
-- After login, the server gives the client an access token.
-- The client sends this token with each secured request.
-- The server checks the token before allowing access.
-
-Purpose:
-- To prove that the user is authenticated
-- To allow access to protected resources
-- To avoid storing session state on the server
-
-Important point:
-- Access token should have a short expiry time.
-- If it gets leaked, the damage is limited because it will expire soon.
-
-
-What is a Refresh Token?
-------------------------
-A refresh token is a long-lived token used to get a new access token.
-
-Main idea:
-- When the access token expires, the user should not be forced to log in again immediately.
-- The refresh token is used to request a new access token.
-
-Purpose:
-- To keep the user logged in for a longer time
-- To reduce the need for repeated login
-- To separate short-term access from long-term authentication
-
-Important point:
-- Refresh token should live longer than access token.
-- It should be stored more carefully than the access token.
-
-
-Why do we need both tokens?
----------------------------
-If only one long-lived token is used, security becomes weaker.
-
-If only one short-lived token is used:
-- security is better
-- but user experience becomes poor because frequent login is required
-
-Using both tokens gives balance:
-- Access token gives security
-- Refresh token gives convenience
+6. After Successfully Creation copy the Client-id and Client-Secret add to application.properties of aplication.yml
+    spring:
+      security:
+        oauth2:
+          client:
+            registration:
+              google:
+                client-id:
+                client-secret:
 
 
-Flow of Authentication
-----------------------
-Step 1: User logs in
-- User sends email/username and password to the server.
-- Server verifies the credentials.
+=======================================================
+How OAuth2 is used in this project
+=======================================================
 
-Step 2: Server generates tokens
-- If login is successful, the server creates:
-  - one access token
-  - one refresh token
+1. OAuth2 login is enabled inside WebSecurityConfig.java
 
-Step 3: Tokens are sent to the client
-- Access token is usually returned in the response body.
-- Refresh token is usually stored safely, often in an HttpOnly cookie.
+    .oauth2Login(oauth2LoginConfi ->
+            oauth2LoginConfi
+                    .failureUrl("/login?error=true")
+                    .successHandler(oAuth2SuccessHandler)
+    )
 
-Step 4: Client accesses protected APIs
-- The client sends the access token in the Authorization header.
-- Common format:
-  Authorization: Bearer <access_token>
+Meaning:
+    - Spring Security starts OAuth2 login flow for configured provider like Google
+    - If login fails, user is redirected to /login?error=true
+    - If login succeeds, control goes to OAuth2SuccessHandler instead of default behaviour
 
-Step 5: Server validates the access token
-- Server checks:
-  - token is present
-  - token is valid
-  - token is not expired
-- If valid, the request is allowed.
+2. SecurityFilterChain works with OAuth2 and JWT together
 
-Step 6: Access token expires
-- Because access token is short-lived, it expires after some time.
-- After expiry, protected API calls will fail if the same token is used.
+    - /posts, /error, /auth/** and /home.html are public
+    - all other endpoints require authentication
+    - session policy is STATELESS
+    - jwtAuthFilter is added before UsernamePasswordAuthenticationFilter
 
-Step 7: Client uses refresh token
-- The client sends the refresh token to a refresh endpoint.
-- Server verifies the refresh token.
+Concept:
+    OAuth2 is used only for initial third-party authentication.
+    After successful OAuth2 login, application creates its own JWT-based authentication flow.
+    So external login provider verifies identity first, then our backend issues tokens for future requests.
 
-Step 8: Server issues a new access token
-- If the refresh token is valid, the server creates a fresh access token.
-- User can continue using the application without logging in again.
+3. Role of OAuth2SuccessHandler.java
 
+    OAuth2SuccessHandler runs after successful OAuth2 authentication.
+    It extends SimpleUrlAuthenticationSuccessHandler and overrides:
 
-Difference Between Access Token and Refresh Token
--------------------------------------------------
-Access Token:
-- Short-lived
-- Used on protected API requests
-- Sent frequently
-- Should expire quickly
+        onAuthenticationSuccess(HttpServletRequest request,
+                                HttpServletResponse response,
+                                Authentication authentication)
 
-Refresh Token:
-- Long-lived
-- Used only to get a new access token
-- Sent less frequently
-- Should be stored more securely
+4. What happens inside OAuth2SuccessHandler
 
+    a. Authentication is cast to OAuth2AuthenticationToken
+       This confirms login came from OAuth2 provider.
 
-Where are they usually stored?
-------------------------------
-Access Token:
-- Commonly stored on the client side
-- Often sent in Authorization header
+    b. Logged-in user details are read from DefaultOAuth2User
+       Example attributes used here:
+           - email
+           - name
 
-Refresh Token:
-- Preferably stored in HttpOnly cookie
-- This reduces exposure to client-side JavaScript
+    c. Application checks local database using email
+           User user = userService.findByEmail(email);
 
-Why this matters:
-- Access token is used again and again, so it is more exposed.
-- Refresh token gives power to generate new access tokens, so it must be protected carefully.
+       If user does not exist, a new local user is created and saved.
 
+    d. After that application generates its own tokens using JwtService
+           String Accesstoken = jwtService.generateAccessToken(user);
+           String RefreshToken = jwtService.generateRefereshToken(user);
 
-Important Security Points
--------------------------
-1. Access token should be short-lived
-- This reduces risk if token is stolen.
+       This is the key idea:
+           Google authenticates the user,
+           but our system creates Access Token and Refresh Token for authorization in our APIs.
 
-2. Refresh token should be protected carefully
-- Because it can be used to issue new access tokens.
+    e. Refresh token is stored in cookie
+           Cookie cookie = new Cookie("RefreshToken", RefreshToken);
+           cookie.setHttpOnly(true);
+           cookie.setSecure(true);
 
-3. Use HTTPS
-- Tokens should never travel over insecure connections.
+       Meaning:
+           - HttpOnly prevents JavaScript access
+           - Secure sends cookie only on HTTPS
 
-4. Keep authentication stateless
-- JWT is commonly used in stateless systems.
-- Server does not need to store login session in memory.
+    f. User is redirected to frontend with access token
+           http://localhost:8080/home.html?token=...
 
-5. Validate token properly
-- Server must always check signature, expiry, and identity.
+5. End-to-end flow
 
-6. Refresh token should not be used as an access token
-- Each token has a separate purpose.
+    User clicks "Login with Google"
+        ->
+    Spring Security redirects user to Google
+        ->
+    Google authenticates user
+        ->
+    Google redirects back to Spring Boot app
+        ->
+    OAuth2SuccessHandler executes
+        ->
+    App reads email and name
+        ->
+    App creates/fetches local user
+        ->
+    App generates JWT access token + refresh token
+        ->
+    Refresh token stored in cookie
+        ->
+    User redirected to frontend with access token
 
+6. Practical understanding
 
-Practical Understanding
------------------------
-Think of it like this:
+    OAuth2 here is not used for direct session-based login after authentication.
+    It is used as a trusted identity provider.
 
-- Access token = temporary entry pass
-- Refresh token = permission to get a new entry pass
+    Final app flow is:
+        OAuth2 provider for identity verification
+        +
+        JWT for stateless API authentication
 
-The user uses the temporary pass many times.
-When that pass expires, the refresh token helps get another one without repeating full login.
-
-
-Why this pattern is useful
---------------------------
-- Better security than one long-lived token
-- Better user experience than forcing login again and again
-- Suitable for modern stateless APIs
-- Common in Spring Security + JWT based applications
-
-
-Summary
--------
-- Access token is used to access protected APIs.
-- Refresh token is used to generate a new access token.
-- Access token should be short-lived.
-- Refresh token should be long-lived and stored securely.
-- Login creates both tokens.
-- Protected requests use access token.
-- Token refresh flow avoids repeated login.
-
+This combination is common in modern applications because:
+    - users can login with Google easily
+    - backend does not need to manage Google passwords
+    - backend still keeps full control over its own authorization/token system
